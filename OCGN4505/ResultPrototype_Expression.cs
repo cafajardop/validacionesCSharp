@@ -22964,7 +22964,7 @@ namespace OpheliaSuiteV2.BRMRuntime
 
                 foreach (var item in personsNoExist)
                 {
-                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification} registrada el|no existe");
+                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification}|no existe");
                 }
             }
 
@@ -23433,36 +23433,36 @@ namespace OpheliaSuiteV2.BRMRuntime
             //Valida WeightKg peso variable 30
             if (!(ent.WeightKg.Equals("999")))
             {
-                if (Convert.ToDouble(ent.WeightKg.Replace(".", ",")) < 1 || Convert.ToDouble(ent.WeightKg.Replace(".", ",")) > 250)
+                if (Convert.ToDouble(ent.WeightKg.Replace(".", ",")) < 0 || Convert.ToDouble(ent.WeightKg.Replace(".", ",")) > 249)
                 {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 1 a 249.9"));
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 30", $"{pipe}", "Peso en kilogramos", $"{pipe}","El rango debe ser un numero menor a 250 o 999 max 1 decimal"));
                 }
             }
 
             //Valida hemoglobina variable 104
-            if (!(ent.ResultHemoglobin.Equals("999")))
+            if (!(ent.ResultHemoglobin.Equals("0")))
             {
                 if (Convert.ToDouble(ent.ResultHemoglobin.Replace(".", ",")) < 1.5 || Convert.ToDouble(ent.ResultHemoglobin.Replace(".", ",")) > 20)
                 {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 1.5  a 20"));
+                    listErrors.Add(string.Concat($"Fila {index}", $"{pipe}","Variable 104", $"{pipe}","ResultadoHemoglobina", $"{pipe}","El rango debe ser un numero decimal de 1.5 a 20 ó 0"));
                 }
             }
 
             //Valida hemoglobina variable 107
-            if (!(ent.ResultCreatinine.Equals("999")))
+            if (!(ent.ResultCreatinine.Equals("999") && ent.ResultCreatinine.Equals("0")))
             {
                 if (Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) < 0.2 || Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) > 25)
                 {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 0.2 a 25"));
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}","Variable 107", $"{pipe}", "Resultado Creatitina", $"{pipe}","El rango debe ser un numero decimal de 0.2 a 25 o tener el valor de 0 ó 999"));
                 }
             }
 
             //Valida hemoglobina variable 109
-            if (!(ent.ResultGlycosylatedHemoglobin.Equals("999")))
+            if (!(ent.ResultCreatinine.Equals("999") && ent.ResultCreatinine.Equals("0")))
             {
                 if (Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")) < 5 || Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) > 20)
                 {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 5 a 20"));
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 109", $"{pipe}", "Hemoglobina Glicosilada", $"{pipe}", "El rango debe ser un numero decimal de 5 a 20 o tener el valor de 0 ó 999"));
                 }
             }
 
