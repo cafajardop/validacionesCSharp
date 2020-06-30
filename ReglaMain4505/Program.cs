@@ -25,15 +25,15 @@ namespace ReglaMain4505
         static void Main(string[] args)
         {
             int CompanyIdLn = 102;
-            int OperatorIdLn = 1251;
-            int LibraryIdLn = 19;
+            int OperatorIdLn = 1565;
+            int LibraryIdLn = 16;
             int TemplateIdLn = 2072;
             string FrmCodiLn = "CWFFPLA1";
-            string CaseNumberLn = "DE60D081-6B7B-401D-842A-78A02E907B14"; //EC0E697E-64B8-4847-B353-FDB781D7C2D9 => Registro cargado por Erika 4731
-            int PeriodLn = 4;
+            string CaseNumberLn = "E87CD8EE-0652-4123-BE99-39DDE86D90E4"; //EC0E697E-64B8-4847-B353-FDB781D7C2D9 => Registro cargado por Erika 4731
+            int PeriodLn = 3;
             int  YearLn = 2019;
             string UserCodeLn = "ERIKAB";
-            string FileIdLn = "aebd374a-22d4-449a-abf4-d84a3e891f62"; //975e78ba-28b6-4302-8a20-eac4a7c09c09 => Registro cargado por Erika 4731
+            string FileIdLn = "cc0b2564-5b86-42fc-afcb-df8be8a32a46"; //975e78ba-28b6-4302-8a20-eac4a7c09c09 => Registro cargado por Erika 4731
             int IdTypePopulationLn = 1;
             //RUL_ValidAllRules4505
             ResultPrototype_Expression y = new ResultPrototype_Expression();

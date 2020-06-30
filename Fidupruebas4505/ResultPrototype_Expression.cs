@@ -19,6 +19,10 @@ using System.Runtime.CompilerServices;
 
 namespace OpheliaSuiteV2.BRMRuntime
 {
+
+
+
+
     /// <sumary>
     /// ResultPrototype_Expression
     /// </sumary> 
@@ -841,135 +845,145 @@ namespace OpheliaSuiteV2.BRMRuntime
             var listDocumentTypesDB = JsonConvert.DeserializeObject<List<dynamic>>(documentTypes.Result.ToString());
             Helper.USR_ValidateDocumentNumber4505(adapterId, _entity, listErrors, index, listDocumentTypesDB, info);
 
+
+
+            DateTime ConvertDate(string date)
+            {
+                IFormatProvider FORMAT_PROVIDER = CultureInfo.InvariantCulture;
+                string FORMAT_DATE = "dd/MM/yyyy";
+                return DateTime.ParseExact(Convert.ToDateTime(date).ToString("dd/MM/yyyy"), FORMAT_DATE, FORMAT_PROVIDER);
+            }
+
             index = 0;
             foreach (var ent in _entity)
             {
-                var CutOffDate = DateTime.Now;
-                var InitialDate = Convert.ToDateTime(DateInit);
-                var EndDate = Convert.ToDateTime(DateEnd);
+                var CutOffDate = ConvertDate(DateEnd);
+                var InitialDate = ConvertDate(DateInit);
+                var EndDate = ConvertDate(DateEnd);
                 //Valida Codigos de habilitacion existentes en la BD  -  Codigos de Ocupacion 
-                Helper.USR_FieldsValidate4505(listErrors, index, listaQualification, listOccupationCode, ent);
+                Helper.USR_FieldsValidate4505(listErrors, (index + 1), listaQualification, listOccupationCode, ent);
 
+                ent.WeightKg = ent.WeightKg.Replace(",", ".").ToString();
                 //Ejecuta las reglas del BRM
                 var res = Helper.SYS_VerificationPrototype(new Func<object>[]
                 {
-                    () => RUL_TypeRegister.Execute(Convert.ToInt32(ent.TypeRegister)),
+                     () => RUL_TypeRegister.Execute(Convert.ToInt32(ent.TypeRegister)),
                      () => RUL_HabilitationCode.Execute(ent.HabilitationCode),
                      () => RUL_IdentificationType.Execute(ent.IdentificationType),
                      () => RUL_FirstLastName.Execute(ent.FirstLastName),
                      () => RUL_SecondLastName.Execute(ent.SecondLastName),
                      () => RUL_FirstName.Execute(ent.FirstName),
                      () => RUL_SecondName.Execute(ent.SecondName),
-                     () => RUL_BirthDate.Execute(Convert.ToDateTime(ent.BirthDate)),
+                     () => RUL_BirthDate.Execute(ConvertDate(ent.BirthDate)),
                      () => RUL_IdSex.Execute(ent.IdSex),
                      () => RUL_CodeEthnic.Execute(Convert.ToInt32(ent.CodeEthnic)),
                      () => RUL_OccupationCode.Execute(ent.OccupationCode),
                      () => RUL_CodeEducaLevel.Execute(Convert.ToInt32(ent.CodeEducaLevel)),
-                     () => RUL_Gestation.Execute(Convert.ToInt32(ent.Gestation),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_GestaCongeSyphilis.Execute(Convert.ToInt32(ent.GestaCongeSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.SexTransInfect)),
-                     () => RUL_HypertenInducPreg.Execute(Convert.ToInt32(ent.HypertenInducPreg),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_CongeHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_Gestation.Execute(Convert.ToInt32(ent.Gestation),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_GestaCongeSyphilis.Execute(Convert.ToInt32(ent.GestaCongeSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.SexTransInfect)),
+                     () => RUL_HypertenInducPreg.Execute(Convert.ToInt32(ent.HypertenInducPreg),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_CongeHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_SymptRespiratory.Execute(Convert.ToInt32(ent.SymptRespiratory),Convert.ToInt32(ent.ResultBacilloscopy)),
                      () => RUL_MultiDrugResisTuber.Execute(Convert.ToInt32(ent.MultiDrugResisTuber)),
                      () => RUL_Leprosy.Execute(Convert.ToInt32(ent.Leprosy),Convert.ToInt32(ent.TreatmentLeprosy)),
-                     () => RUL_ObesCaloProtMalnut.Execute(Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateDiagMalnutrition),Convert.ToDouble(ent.WeightKg),Convert.ToInt32(ent.HeightCm)),
-                     () => RUL_AbuseVictim.Execute(Convert.ToInt32(ent.AbuseVictim),ent.IdSex,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateConsuVictimAbuse),CutOffDate),
-                     () => RUL_VictimSexViolence.Execute(Convert.ToInt32(ent.VictimSexViolence),Convert.ToDateTime(ent.DateConsuVictSexViolence)),
+                     () => RUL_ObesCaloProtMalnut.Execute(Convert.ToInt32(ent.ObesCaloProtMalnut),ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateDiagMalnutrition),Convert.ToDouble(ent.WeightKg.Replace(",", ".")),Convert.ToInt32(ent.HeightCm)),
+                     () => RUL_AbuseVictim.Execute(Convert.ToInt32(ent.AbuseVictim),ent.IdSex,ConvertDate(ent.BirthDate),ConvertDate(ent.DateConsuVictimAbuse),CutOffDate),
+                     () => RUL_VictimSexViolence.Execute(Convert.ToInt32(ent.VictimSexViolence),ConvertDate(ent.DateConsuVictSexViolence)),
                      () => RUL_SexTransInfect.Execute(Convert.ToInt32(ent.SexTransInfect)),
                      () => RUL_DiagMentalIllness.Execute(Convert.ToInt32(ent.DiagMentalIllness)),
                      () => RUL_CervixCancer.Execute(Convert.ToInt32(ent.CervixCancer),ent.IdSex),
                      () => RUL_BreastCancer.Execute(Convert.ToInt32(ent.BreastCancer)),
                      () => RUL_DentalFluorosis.Execute(Convert.ToInt32(ent.DentalFluorosis)),
-                     () => RUL_DateWeight.Execute(Convert.ToDateTime(ent.DateWeight),InitialDate,EndDate,Convert.ToDouble(ent.WeightKg)),
-                     () => RUL_WeightKg.Execute(Convert.ToDouble(ent.WeightKg),Convert.ToDateTime(ent.DateWeight)),
-                     () => RUL_DateHeight.Execute(Convert.ToDateTime(ent.DateHeight),InitialDate,EndDate,Convert.ToDouble(ent.HeightCm)),
-                     () => RUL_HeightCm.Execute(Convert.ToDouble(ent.HeightCm),Convert.ToDateTime(ent.DateHeight)),
-                     () => RUL_DateEstimPartitium.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.DateEstimPartitium),Convert.ToDateTime(ent.BirthDate),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateFirstTimePrenaCtrl)),
-                     () => RUL_GestaAgeBorn.Execute(Convert.ToInt32(ent.GestaAgeBorn),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_PPBCG.Execute(Convert.ToInt32(ent.BCG),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_HepatBUnderOneYear.Execute(Convert.ToInt32(ent.HepatBUnderOneYear),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Pentavalent.Execute(Convert.ToInt32(ent.Pentavalent),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Polio.Execute(Convert.ToInt32(ent.Polio),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DPTUnderFiveYears.Execute(Convert.ToInt32(ent.DPTUnderFiveYears),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Rotavirus.Execute(Convert.ToInt32(ent.Rotavirus),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Pneumococcus.Execute(Convert.ToInt32(ent.Pneumococcus),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_InfluenzaChildren.Execute(Convert.ToInt32(ent.InfluenzaChildren),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_YellowFeverOneY.Execute(Convert.ToInt32(ent.YellowFeverOneY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_HepatitisA.Execute(Convert.ToInt32(ent.HepatitisA),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_TriViralChild.Execute(Convert.ToInt32(ent.TriViralChild),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_PPVPH.Execute(Convert.ToInt32(ent.VPH),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_TDorTTWomFertAge.Execute(Convert.ToInt32(ent.TDorTTWomFertAge),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_BactPlateCtrl.Execute(Convert.ToInt32(ent.BactPlateCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateAttenPartiCesar.Execute(Convert.ToDateTime(ent.DateAttenPartiCesar),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_ExitDateAttenPartiCesar.Execute(Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.ExitDateAttenPartiCesar),ent.IdSex,Convert.ToDateTime(ent.DateAttenPartiCesar)),
-                     () => RUL_DateBreastfeeding.Execute(CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateBreastfeeding),InitialDate,ent.IdSex),
-                     () => RUL_DateNewbornCtrl.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateNewbornCtrl)),
-                     () => RUL_DateFamiPlanFirstTime.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateFamiPlanFirstTime)),
-                     () => RUL_SupplyContracMethod.Execute(Convert.ToInt32(ent.SupplyContracMethod),Convert.ToDateTime(ent.DateContracDelivery),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateContracDelivery.Execute(Convert.ToDateTime(ent.DateContracDelivery),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateFirstTimePrenaCtrl.Execute(Convert.ToDateTime(ent.DateFirstTimePrenaCtrl),ent.IdSex,Convert.ToDateTime(ent.BirthDate),Convert.ToInt32(ent.Gestation),CutOffDate,Convert.ToDateTime(ent.DateLastPrenatalCtrl)),
-                     () => RUL_PrenatalCtrl.Execute(Convert.ToInt32(ent.PrenatalCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_DateLastPrenatalCtrl.Execute(Convert.ToDateTime(ent.DateLastPrenatalCtrl),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateFirstTimePrenaCtrl)),
-                     () => RUL_FolicAcidLastPrenaCtrl.Execute(Convert.ToInt32(ent.FolicAcidLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_FerrSulfLastPrenaCtrl.Execute(Convert.ToInt32(ent.FerrSulfLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_CalciumLastPrenaCtrl.Execute(Convert.ToInt32(ent.CalciumLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_DateVisualAssessment.Execute(Convert.ToDateTime(ent.DateVisualAssessment),InitialDate,EndDate),
-                     () => RUL_Dateconsultophthalm.Execute(Convert.ToDateTime(ent.DateConsultOphthalm),Convert.ToDateTime(ent.BirthDate),InitialDate,EndDate),
-                     () => RUL_DateDiagMalnutrition.Execute(Convert.ToDateTime(ent.DateDiagMalnutrition),Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDouble(ent.WeightKg),Convert.ToDouble(ent.HeightCm),InitialDate,EndDate),
-                     () => RUL_DateConsuVictimAbuse.Execute(Convert.ToDateTime(ent.DateConsuVictimAbuse),InitialDate,EndDate),
-                     () => RUL_DateConsuVictSexViolence.Execute(Convert.ToDateTime(ent.DateConsuVictSexViolence),InitialDate,EndDate),
-                     () => RUL_DateNutritionConsult.Execute(Convert.ToDateTime(ent.DateNutritionConsult),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_DatePsychologyConsult.Execute(Convert.ToDateTime(ent.DatePsychologyConsult),InitialDate,EndDate),
-                     () => RUL_DateGrowthDev.Execute(Convert.ToDateTime(ent.DateGrowthDev),CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_FerrSulfLastConsuUnderTenY.Execute(Convert.ToInt32(ent.FerrSulfLastConsuUnderTenY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_VitALastConsuUnderTenY.Execute(Convert.ToInt32(ent.VitALastConsuUnderTenY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateYoungConsuFirstTime.Execute(Convert.ToDateTime(ent.DateYoungConsuFirstTime),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_DateAdultConsuFirstTime.Execute(Convert.ToDateTime(ent.DateAdultConsuFirstTime),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_DateWeight.Execute(ConvertDate(ent.DateWeight),InitialDate,EndDate,Convert.ToDouble(ent.WeightKg.Replace(".", ","))),
+                     () => RUL_WeightKg.Execute(Convert.ToDouble(ent.WeightKg.Replace(".", ",")),ConvertDate(ent.DateWeight)),
+                     () => RUL_DateHeight.Execute(ConvertDate(ent.DateHeight),InitialDate,EndDate,Convert.ToDouble(ent.HeightCm)),
+                     () => RUL_HeightCm.Execute(Convert.ToDouble(ent.HeightCm.Replace(".", ",")),ConvertDate(ent.DateHeight)),
+                     () => RUL_DateEstimPartitium.Execute(InitialDate,CutOffDate,ConvertDate(ent.DateEstimPartitium),ConvertDate(ent.BirthDate),ent.IdSex,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateFirstTimePrenaCtrl)),
+                     () => RUL_GestaAgeBorn.Execute(Convert.ToInt32(ent.GestaAgeBorn),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_PPBCG.Execute(Convert.ToInt32(ent.BCG),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_HepatBUnderOneYear.Execute(Convert.ToInt32(ent.HepatBUnderOneYear),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Pentavalent.Execute(Convert.ToInt32(ent.Pentavalent),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Polio.Execute(Convert.ToInt32(ent.Polio),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DPTUnderFiveYears.Execute(Convert.ToInt32(ent.DPTUnderFiveYears),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Rotavirus.Execute(Convert.ToInt32(ent.Rotavirus),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Pneumococcus.Execute(Convert.ToInt32(ent.Pneumococcus),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_InfluenzaChildren.Execute(Convert.ToInt32(ent.InfluenzaChildren),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_YellowFeverOneY.Execute(Convert.ToInt32(ent.YellowFeverOneY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_HepatitisA.Execute(Convert.ToInt32(ent.HepatitisA),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_TriViralChild.Execute(Convert.ToInt32(ent.TriViralChild),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_PPVPH.Execute(Convert.ToInt32(ent.VPH),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_TDorTTWomFertAge.Execute(Convert.ToInt32(ent.TDorTTWomFertAge),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_BactPlateCtrl.Execute(Convert.ToInt32(ent.BactPlateCtrl),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateAttenPartiCesar.Execute(ConvertDate(ent.DateAttenPartiCesar),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_ExitDateAttenPartiCesar.Execute(ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.ExitDateAttenPartiCesar),ent.IdSex,ConvertDate(ent.DateAttenPartiCesar)),
+                     () => RUL_DateBreastfeeding.Execute(CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateBreastfeeding),InitialDate,ent.IdSex),
+                     () => RUL_DateNewbornCtrl.Execute(InitialDate,CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateNewbornCtrl)),
+                     () => RUL_DateFamiPlanFirstTime.Execute(InitialDate,CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateFamiPlanFirstTime)),
+                     () => RUL_SupplyContracMethod.Execute(Convert.ToInt32(ent.SupplyContracMethod),ConvertDate(ent.DateContracDelivery),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateContracDelivery.Execute(ConvertDate(ent.DateContracDelivery),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateFirstTimePrenaCtrl.Execute(ConvertDate(ent.DateFirstTimePrenaCtrl),ent.IdSex,ConvertDate(ent.BirthDate),Convert.ToInt32(ent.Gestation),CutOffDate,ConvertDate(ent.DateLastPrenatalCtrl)),
+                     () => RUL_PrenatalCtrl.Execute(Convert.ToInt32(ent.PrenatalCtrl),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_DateLastPrenatalCtrl.Execute(ConvertDate(ent.DateLastPrenatalCtrl),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateFirstTimePrenaCtrl)),
+                     () => RUL_FolicAcidLastPrenaCtrl.Execute(Convert.ToInt32(ent.FolicAcidLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_FerrSulfLastPrenaCtrl.Execute(Convert.ToInt32(ent.FerrSulfLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_CalciumLastPrenaCtrl.Execute(Convert.ToInt32(ent.CalciumLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_DateVisualAssessment.Execute(ConvertDate(ent.DateVisualAssessment),InitialDate,EndDate),
+                     () => RUL_Dateconsultophthalm.Execute(ConvertDate(ent.DateConsultOphthalm),ConvertDate(ent.BirthDate),InitialDate,EndDate),
+                     () => RUL_DateDiagMalnutrition.Execute(ConvertDate(ent.DateDiagMalnutrition),Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDouble(ent.WeightKg.Replace(".", ",")),Convert.ToDouble(ent.HeightCm.Replace(".", ",")),InitialDate,EndDate),
+                     () => RUL_DateConsuVictimAbuse.Execute(ConvertDate(ent.DateConsuVictimAbuse),InitialDate,EndDate),
+                     () => RUL_DateConsuVictSexViolence.Execute(ConvertDate(ent.DateConsuVictSexViolence),InitialDate,EndDate),
+                     () => RUL_DateNutritionConsult.Execute(ConvertDate(ent.DateNutritionConsult),InitialDate,CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_DatePsychologyConsult.Execute(ConvertDate(ent.DatePsychologyConsult),InitialDate,EndDate),
+                     () => RUL_DateGrowthDev.Execute(ConvertDate(ent.DateGrowthDev),CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_FerrSulfLastConsuUnderTenY.Execute(Convert.ToInt32(ent.FerrSulfLastConsuUnderTenY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_VitALastConsuUnderTenY.Execute(Convert.ToInt32(ent.VitALastConsuUnderTenY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateYoungConsuFirstTime.Execute(ConvertDate(ent.DateYoungConsuFirstTime),InitialDate,CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_DateAdultConsuFirstTime.Execute(ConvertDate(ent.DateAdultConsuFirstTime),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_CondomDelivPatientITS.Execute(Convert.ToInt32(ent.CondomDelivPatientITS)),
-                     () => RUL_DatePreTestElisaVIH.Execute(Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToDateTime(ent.DatePostTestElisaVIH),Convert.ToDateTime(ent.DateElisaTakingVIH)),
-                     () => RUL_DatePostTestElisaVIH.Execute(Convert.ToDateTime(ent.DatePostTestElisaVIH),Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToDateTime(ent.DateElisaTakingVIH)),
+                     () => RUL_DatePreTestElisaVIH.Execute(ConvertDate(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.BirthDate),CutOffDate,InitialDate,ConvertDate(ent.DatePostTestElisaVIH),ConvertDate(ent.DateElisaTakingVIH)),
+                     () => RUL_DatePostTestElisaVIH.Execute(ConvertDate(ent.DatePostTestElisaVIH),ConvertDate(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.BirthDate),CutOffDate,InitialDate,ConvertDate(ent.DateElisaTakingVIH)),
                      () => RUL_AttentMentalIllness.Execute(Convert.ToInt32(ent.AttentMentalIllness),Convert.ToInt32(ent.DiagMentalIllness)),
-                     () => RUL_DateHepatitisBPregnant.Execute(Convert.ToDateTime(ent.DateHepatitisBPregnant),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.ResultHepatitisBPregnant)),
-                     () => RUL_ResultHepatitisBPregnant.Execute(Convert.ToInt32(ent.ResultHepatitisBPregnant),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateHepatitisBPregnant)),
-                     () => RUL_DateSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),Convert.ToDateTime(ent.DateSerologySyphilis)),
-                     () => RUL_ResultSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),Convert.ToDateTime(ent.DateSerologySyphilis)),
-                     () => RUL_DateElisaTakingVIH.Execute(Convert.ToDateTime(ent.DateElisaTakingVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToDateTime(ent.DatePostTestElisaVIH),CutOffDate,InitialDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultElisaVIH.Execute(Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.DateElisaTakingVIH)),
-                     () => RUL_DateNeonatalTSH.Execute(Convert.ToDateTime(ent.DateNeonatalTSH),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToInt32(ent.ResultNeonatalTSH)),
-                     () => RUL_ResultNeonatalTSH.Execute(Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToDateTime(ent.DateNeonatalTSH)),
-                     () => RUL_CervicalCancerScreening.Execute(Convert.ToInt32(ent.CervicalCancerScreening),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateCervicalCytology.Execute(Convert.ToDateTime(ent.DateCervicalCytology),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalCytology),InitialDate),
-                     () => RUL_ResultCervicalCytology.Execute(Convert.ToInt32(ent.ResultCervicalCytology),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateCervicalCytology)),
-                     () => RUL_QualityCytologySample.Execute(Convert.ToInt32(ent.QualityCytologySample),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalCytology)),
-                     () => RUL_HabilitationCodeCytology.Execute(ent.HabilitationCodeCytology,ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.QualityCytologySample)),
-                     () => RUL_DateColposcopy.Execute(Convert.ToDateTime(ent.DateColposcopy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,InitialDate),
-                     () => RUL_HabilitationCodeColposcopy.Execute(ent.HabilitationCodeColposcopy,ent.IdSex,Convert.ToDateTime(ent.DateColposcopy),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateCervicalBiopsy.Execute(Convert.ToDateTime(ent.DateCervicalBiopsy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalBiopsy),InitialDate),
-                     () => RUL_ResultCervicalBiopsy.Execute(Convert.ToInt32(ent.ResultCervicalBiopsy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToDateTime(ent.DateCervicalBiopsy)),
-                     () => RUL_HabilitationCodeBiopsy.Execute(ent.HabilitationCodeBiopsy,ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalBiopsy)),
-                     () => RUL_DateMammography.Execute(Convert.ToDateTime(ent.DateMammography),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography),InitialDate),
-                     () => RUL_ResultMammography.Execute(Convert.ToInt32(ent.ResultMammography),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateMammography)),
-                     () => RUL_HabilitationCodeMammography.Execute(ent.HabilitationCodeMammography,ent.IdSex,Convert.ToInt32(ent.ResultMammography),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateBreastBiopsyBACAF.Execute(Convert.ToDateTime(ent.DateBreastBiopsyBACAF),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography)),
-                     () => RUL_DateResultBreastBiopsy.Execute(Convert.ToDateTime(ent.DateResultBreastBiopsy),CutOffDate,Convert.ToDateTime(ent.BirthDate),ent.IdSex,Convert.ToDateTime(ent.DateBreastBiopsyBACAF)),
-                     () => RUL_ResultBiopsyBreast.Execute(Convert.ToInt32(ent.ResultBiopsyBreast),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateResultBreastBiopsy)),
-                     () => RUL_HabiliationCodeBiopsyBreast.Execute(ent.HabiliationCodeBiopsyBreast,ent.IdSex,Convert.ToInt32(ent.ResultBiopsyBreast),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateHemoglobin.Execute(Convert.ToDateTime(ent.DateHemoglobin),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultHemoglobin.Execute(Convert.ToDouble(ent.ResultHemoglobin)),
-                     () => RUL_DateGlycemia.Execute(Convert.ToDateTime(ent.DateGlycemia)),
-                     () => RUL_DateCreatinine.Execute(Convert.ToDateTime(ent.DateCreatinine),Convert.ToDouble(ent.ResultCreatinine),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultCreatinine.Execute(Convert.ToDouble(ent.ResultCreatinine),Convert.ToDateTime(ent.DateCreatinine)),
-                     () => RUL_DateGlycosylatedHemoglobin.Execute(Convert.ToDateTime(ent.DateGlycosylatedHemoglobin),Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultGlycosylatedHemoglobin.Execute(Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),Convert.ToDateTime(ent.DateGlycosylatedHemoglobin)),
-                     () => RUL_DateMicroalbuminuria.Execute(Convert.ToDateTime(ent.DateMicroalbuminuria)),
-                     () => RUL_DateHDL.Execute(Convert.ToDateTime(ent.DateHDL)),
-                     () => RUL_DateBacilloscopy.Execute(Convert.ToDateTime(ent.DateBacilloscopy),Convert.ToInt32(ent.ResultBacilloscopy)),
-                     () => RUL_ResultBacilloscopy.Execute(Convert.ToInt32(ent.ResultBacilloscopy),Convert.ToDateTime(ent.DateBacilloscopy)),
+                     () => RUL_DateHepatitisBPregnant.Execute(ConvertDate(ent.DateHepatitisBPregnant),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.ResultHepatitisBPregnant)),
+                     () => RUL_ResultHepatitisBPregnant.Execute(Convert.ToInt32(ent.ResultHepatitisBPregnant),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateHepatitisBPregnant)),
+                     () => RUL_DateSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),ConvertDate(ent.DateSerologySyphilis)),
+                     () => RUL_ResultSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),ConvertDate(ent.DateSerologySyphilis)),
+                     () => RUL_DateElisaTakingVIH.Execute(ConvertDate(ent.DateElisaTakingVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.DatePreTestElisaVIH),ConvertDate(ent.DatePostTestElisaVIH),CutOffDate,InitialDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultElisaVIH.Execute(Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.DateElisaTakingVIH)),
+                     () => RUL_DateNeonatalTSH.Execute(ConvertDate(ent.DateNeonatalTSH),InitialDate,CutOffDate,ConvertDate(ent.BirthDate),Convert.ToInt32(ent.ResultNeonatalTSH)),
+                     () => RUL_ResultNeonatalTSH.Execute(Convert.ToInt32(ent.ResultNeonatalTSH),ConvertDate(ent.DateNeonatalTSH)),
+                     () => RUL_CervicalCancerScreening.Execute(Convert.ToInt32(ent.CervicalCancerScreening),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateCervicalCytology.Execute(ConvertDate(ent.DateCervicalCytology),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalCytology),InitialDate),
+                     () => RUL_ResultCervicalCytology.Execute(Convert.ToInt32(ent.ResultCervicalCytology),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateCervicalCytology)),
+                     () => RUL_QualityCytologySample.Execute(Convert.ToInt32(ent.QualityCytologySample),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalCytology)),
+                     () => RUL_HabilitationCodeCytology.Execute(ent.HabilitationCodeCytology,ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.QualityCytologySample)),
+                     () => RUL_DateColposcopy.Execute(ConvertDate(ent.DateColposcopy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,InitialDate),
+                     () => RUL_HabilitationCodeColposcopy.Execute(ent.HabilitationCodeColposcopy,ent.IdSex,ConvertDate(ent.DateColposcopy),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateCervicalBiopsy.Execute(ConvertDate(ent.DateCervicalBiopsy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalBiopsy),InitialDate),
+                     () => RUL_ResultCervicalBiopsy.Execute(Convert.ToInt32(ent.ResultCervicalBiopsy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,ConvertDate(ent.DateCervicalBiopsy)),
+                     () => RUL_HabilitationCodeBiopsy.Execute(ent.HabilitationCodeBiopsy,ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalBiopsy)),
+                     () => RUL_DateMammography.Execute(ConvertDate(ent.DateMammography),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography),InitialDate),
+                     () => RUL_ResultMammography.Execute(Convert.ToInt32(ent.ResultMammography),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateMammography)),
+                     () => RUL_HabilitationCodeMammography.Execute(ent.HabilitationCodeMammography,ent.IdSex,Convert.ToInt32(ent.ResultMammography),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateBreastBiopsyBACAF.Execute(ConvertDate(ent.DateBreastBiopsyBACAF),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography)),
+                     () => RUL_DateResultBreastBiopsy.Execute(ConvertDate(ent.DateResultBreastBiopsy),CutOffDate,ConvertDate(ent.BirthDate),ent.IdSex,ConvertDate(ent.DateBreastBiopsyBACAF)),
+                     () => RUL_ResultBiopsyBreast.Execute(Convert.ToInt32(ent.ResultBiopsyBreast),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateResultBreastBiopsy)),
+                     () => RUL_HabiliationCodeBiopsyBreast.Execute(ent.HabiliationCodeBiopsyBreast,ent.IdSex,Convert.ToInt32(ent.ResultBiopsyBreast),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateHemoglobin.Execute(ConvertDate(ent.DateHemoglobin),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultHemoglobin.Execute(Convert.ToDouble(ent.ResultHemoglobin.Replace(".",","))),
+                     () => RUL_DateGlycemia.Execute(ConvertDate(ent.DateGlycemia)),
+                     () => RUL_DateCreatinine.Execute(ConvertDate(ent.DateCreatinine),Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultCreatinine.Execute(Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")),ConvertDate(ent.DateCreatinine)),
+                     () => RUL_DateGlycosylatedHemoglobin.Execute(ConvertDate(ent.DateGlycosylatedHemoglobin),Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultGlycosylatedHemoglobin.Execute(Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")),ConvertDate(ent.DateGlycosylatedHemoglobin)),
+                     () => RUL_DateMicroalbuminuria.Execute(ConvertDate(ent.DateMicroalbuminuria)),
+                     () => RUL_DateHDL.Execute(ConvertDate(ent.DateHDL)),
+                     () => RUL_DateBacilloscopy.Execute(ConvertDate(ent.DateBacilloscopy),Convert.ToInt32(ent.ResultBacilloscopy)),
+                     () => RUL_ResultBacilloscopy.Execute(Convert.ToInt32(ent.ResultBacilloscopy),ConvertDate(ent.DateBacilloscopy)),
                      () => RUL_TreatmentCongenitalHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism)),
-                     () => RUL_TreatmentGestationalSyphilis.Execute(Convert.ToInt32(ent.TreatmentGestationalSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.GestaCongeSyphilis),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_TreatmentGestationalSyphilis.Execute(Convert.ToInt32(ent.TreatmentGestationalSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.GestaCongeSyphilis),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_TreatmentCongenitalSyphilis.Execute(Convert.ToInt32(ent.TreatmentCongenitalSyphilis),Convert.ToInt32(ent.GestaCongeSyphilis)),
                      () => RUL_TreatmentLeprosy.Execute(Convert.ToInt32(ent.Leprosy),Convert.ToInt32(ent.TreatmentLeprosy)),
-                     () => RUL_EndDateTreatmentLeishmaniasis.Execute(Convert.ToDateTime(ent.EndDateTreatmentLeishmaniasis),InitialDate,EndDate)
+                     () => RUL_EndDateTreatmentLeishmaniasis.Execute(ConvertDate(ent.EndDateTreatmentLeishmaniasis),InitialDate,EndDate)
                  });
 
                 //Recorre los registros para insertar en la lista de errores 
@@ -22398,6 +22412,8 @@ namespace OpheliaSuiteV2.BRMRuntime
     /// </sumary>
     public static class Helper
     {
+        #region Members
+        #endregion
         /// <sumary>
         /// Calcula la edad
         /// </sumary> 
@@ -22441,6 +22457,76 @@ namespace OpheliaSuiteV2.BRMRuntime
             return result;
 
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web
+        /// </sumary> 
+        /// <param name="method">Método del servicio</param>
+        /// <param name="url">Url del servicio web</param>
+        /// <param name="parameters">Parámetros del método a consumir</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        /// <param name="fileFullPath">fileFullPath</param>
+        /// <param name="minTimeout">Minutos de timeout</param>
+        public static ENT_ActionResult SYS_WSRequest(string method, string url, object parameters, dynamic headers, string fileFullPath, double? minTimeout)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(url))
+                {
+                    throw new ArgumentNullException("method or url");
+                }
+
+                HttpMethod httpMethod = new HttpMethod(method);
+                double min = minTimeout != null && minTimeout > 0 ? (double)minTimeout : 3;
+                using (HttpClient Client = new HttpClient { Timeout = TimeSpan.FromMinutes(min) })
+                {
+                    using (var request = new HttpRequestMessage(httpMethod, url))
+                    {
+                        if (parameters != null)
+                        {
+                            request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+                        }
+
+                        if (headers != null)
+                        {
+                            foreach (KeyValuePair<String, String> header in headers)
+                            {
+                                request.Headers.Add(header.Key, header.Value);
+                            }
+                        }
+
+                        using (HttpResponseMessage response = Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result)
+                        {
+                            using (HttpContent content = response.Content)
+                            {
+                                string result = content.ReadAsStringAsync().Result;
+
+                                if (response.StatusCode == HttpStatusCode.OK)
+                                {
+                                    var resultWs = JsonConvert.DeserializeObject<dynamic>(result);
+                                    if ((bool)resultWs.IsError)
+                                    {
+                                        return new ENT_ActionResult() { IsError = true, ErrorMessage = resultWs.ErrorMessage };
+                                    }
+                                    return new ENT_ActionResult() { IsSuccessful = resultWs.IsSucessfull, Result = resultWs.Result };
+
+                                }
+
+                                else
+                                    return new ENT_ActionResult() { IsError = true, ErrorMessage = result };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.InnerException.Message + ex.StackTrace };
+            }
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Obtiene un archivo del repositorio de archivos según el tipo
         /// </sumary> 
@@ -22459,7 +22545,7 @@ namespace OpheliaSuiteV2.BRMRuntime
                 ENT_ActionResult result = new ENT_ActionResult();
                 string url = "http://190.217.17.108:8080/api/api/Upload/GetDocument";
                 url = url + "?company=" + company + "&libraryId=" + libraryId + "&fileId=" + fileId;
-                result = SYS_WSGET(url, null);
+                result = Helper.SYS_WSGET(url, null);
                 return result;
             }
             catch (Exception ex)
@@ -22467,6 +22553,80 @@ namespace OpheliaSuiteV2.BRMRuntime
                 return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web GET
+        /// </sumary> 
+        /// <param name="url">Url del servicio Web</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        public static ENT_ActionResult SYS_WSGET(string url, dynamic headers)
+        {
+            ENT_ActionResult result = new ENT_ActionResult();
+            result = Helper.SYS_WSRequest("GET", url, null, headers, null, null);
+            return result;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="remoteFile">Ruta destino de archivo a subir</param>
+        /// <param name="localFile">FileStream de archivo a subir</param>
+        public static string USR_FtpUpload(string remoteFile, dynamic localFile)
+        {
+            try
+            {
+                string ftp = "davincilb.ophelia.co";
+                string userName = "OpheliaDcom";
+                string password = "iCNw7vyq6O";
+
+                string host = ("ftp://" + ftp);
+
+                if (string.IsNullOrEmpty(ftp) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                {
+                    throw new ArgumentNullException("ftp,userName,password");
+                }
+                int bufferSize = 2048;
+                /* Create an FTP Request */
+                FtpWebRequest ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
+                /* Log in to the FTP Server with the User Name and Password Provided */
+                ftpRequest.Credentials = new NetworkCredential(userName, password);
+                /* When in doubt, use these options */
+                ftpRequest.UseBinary = true;
+                ftpRequest.UsePassive = true;
+                ftpRequest.KeepAlive = true;
+                /* Specify the Type of FTP Request */
+                ftpRequest.Method = WebRequestMethods.Ftp.UploadFile;
+                /* Establish Return Communication with the FTP Server */
+                Stream ftpStream = ftpRequest.GetRequestStream();
+                /* Buffer for the Downloaded Data */
+                localFile.Position = 0;
+                byte[] byteBuffer = new byte[bufferSize];
+                int bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
+                /* Upload the File by Sending the Buffered Data Until the Transfer is Complete */
+                while (bytesSent != 0)
+                {
+                    ftpStream.Write(byteBuffer, 0, bytesSent);
+                    bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
+                }
+
+                /* Resource Cleanup */
+                localFile.Close();
+                ftpStream.Close();
+                using (FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse())
+                {
+                    ftpRequest = null;
+                    return response.StatusDescription;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Adjunta el archivo al proceso
         /// </sumary> 
@@ -22490,7 +22650,7 @@ namespace OpheliaSuiteV2.BRMRuntime
                 remotePath += $"/{fileName}";
                 using (FileStream fs = new FileStream(fileFullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
-                    var r = USR_FtpUpload(remotePath, fs);
+                    var r = Helper.USR_FtpUpload(remotePath, fs);
                     fs.Close();
                 }
 
@@ -22501,6 +22661,23 @@ namespace OpheliaSuiteV2.BRMRuntime
                 return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web POST
+        /// </sumary> 
+        /// <param name="url">Url del Servicio Web</param>
+        /// <param name="parameters">Parámetros del servicio</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        /// <param name="fileFullPath">fileFullPath</param>
+        public static ENT_ActionResult SYS_WSPOST(string url, object parameters, dynamic headers, string fileFullPath)
+        {
+            ENT_ActionResult result = new ENT_ActionResult();
+            result = Helper.SYS_WSRequest("POST", url, parameters, headers, fileFullPath, null);
+            return result;
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar campos vacios
         /// </sumary> 
@@ -22509,6 +22686,8 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             return String.IsNullOrEmpty(PE_Value) ? "PE_Empty" : PE_Value;
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar Fecha dentro de un ranfo de fechas
         /// </sumary> 
@@ -22520,6 +22699,8 @@ namespace OpheliaSuiteV2.BRMRuntime
             return Date >= InitDate && Date <= EndDate;
 
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar el tipo de fecha
         /// </sumary> 
@@ -22528,6 +22709,8 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             return DateTime.TryParse(EsFecha, out DateTime _);
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función que valida los caracteres especiales en una cadena de texto
         /// </sumary> 
@@ -22538,6 +22721,8 @@ namespace OpheliaSuiteV2.BRMRuntime
 
             return pattern.IsMatch(text);
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22572,6 +22757,8 @@ namespace OpheliaSuiteV2.BRMRuntime
             };
             return true;
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22587,7 +22774,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             try
             {
-                var result = USR_WSGetFile(company, libraryId, fileId);
+                var result = Helper.USR_WSGetFile(company, libraryId, fileId);
 
                 Type typeEntity = (Type)entity;
                 Type genericListType = typeof(List<>).MakeGenericType(typeEntity);
@@ -22600,7 +22787,7 @@ namespace OpheliaSuiteV2.BRMRuntime
 
                     if (fileBody != null && fileBody.Length > 0)
                     {
-                        if (!USR_ValidateFileName4505(listErrors, (string)((JValue)((dynamic)result.Result).FileName).Value))
+                        if (!Helper.USR_ValidateFileName4505(listErrors, (string)((JValue)((dynamic)result.Result).FileName).Value))
                         {
                             listErrors.Add($"El Nombre del archivo no es valido, no cumple con la estructura especificada {result.FileName}");
                             return lstEntities;
@@ -22668,7 +22855,7 @@ namespace OpheliaSuiteV2.BRMRuntime
 
                                 if (listErrors.Count == 0)
                                 {
-                                    lstEntities = SYS_FileToEntities(text1, lineSeparator, columnSeparator, entity);
+                                    lstEntities = Helper.SYS_FileToEntities(text1, lineSeparator, columnSeparator, entity);
                                     listErrors.AddRange(listErrorsAdd);
 
                                     int index = 0;
@@ -22687,6 +22874,9 @@ namespace OpheliaSuiteV2.BRMRuntime
                                         {
                                             dic.Add($"{ent.IdentificationType}_{ent.DocumentNumber}", ent.DocumentNumber);
                                         }
+                                        List<dynamic> listValidate = new List<dynamic>();
+                                        listValidate.Add(new { msjfinal = "" });
+                                        listValidate.Clear();
                                         //Ingresa las validacion de las expresiones regulares
                                         if (ent.ValidationErrorsList?.Count > 0)
                                         {
@@ -22698,7 +22888,14 @@ namespace OpheliaSuiteV2.BRMRuntime
                                                             .Single(pro => Regex.IsMatch(msg, string.Format(@"\b{0}\b", Regex.Escape(pro.Value.Name))));
                                                 string msgError = ((RegexAttribute)p.Value.GetCustomAttribute(typeof(RegexAttribute)))?.Message;
 
-                                                listErrors.Add(string.Concat(mensajeItem, columnSeparator, msgError.Trim().Replace("-", "|").Replace(" - ", "|")));
+                                                string msjFinaly = string.Concat(mensajeItem, columnSeparator, msgError.Trim().Replace("-", "|").Replace(" - ", "|"));
+
+                                                if (listValidate.FirstOrDefault(x => x.msjfinal == msjFinaly) == null)
+                                                {
+                                                    listValidate.Add(new { msjfinal = msjFinaly });
+                                                    listErrors.Add(msjFinaly);
+                                                }
+
                                             }
                                         }
                                         ++index;
@@ -22737,6 +22934,8 @@ namespace OpheliaSuiteV2.BRMRuntime
                 throw;
             }
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22792,779 +22991,72 @@ namespace OpheliaSuiteV2.BRMRuntime
 
             return listError.Count == 0;
         }
+        #region Members
+        #endregion
         /// <sumary>
-        /// Plantilla de Función vacía
+        /// Valida si el nombre de una resolución es valido
         /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="_entity">_entity</param>
-        /// <param name="listErrors">listErrors</param>
-        /// <param name="index">index</param>
-        /// <param name="listDocumentTypesDB">listDocumentTypesDB</param>
-        /// <param name="IdTypePopulation">IdTypePopulation</param>
-        public static long USR_ValidateDocumentNumber4505(long adapterId, List<ENT_StructureRes4505En> _entity, List<string> listErrors, long index, List<dynamic> listDocumentTypesDB, long IdTypePopulation)
+        /// <param name="codeEPSlength">longitud del codigo de la EPS</param>
+        /// <param name="resolutionCode">Codigo de la Resolucion</param>
+        /// <param name="listError">Lista de errores</param>
+        /// <param name="fileName">Nombre del archivo a validar</param>
+        public static bool USR_ValidateFileName(long codeEPSlength, string resolutionCode, List<string> listError, string fileName)
         {
-            index = 1;
-            //Funcion valida si el usuario existe
-            List<dynamic> personList = new List<dynamic>();
-            var listErrorsDocumentNumber = new List<string>();
-            Dictionary<string, ENT_StructureRes4505En> _dictionary4505 = new Dictionary<string, ENT_StructureRes4505En>();
-            Dictionary<string, string> _dictionaryDocumentType = new Dictionary<string, string>();
-            _dictionaryDocumentType.Add("TI", "3");
-            _dictionaryDocumentType.Add("CC", "1");
-            _dictionaryDocumentType.Add("CE", "6");
-            _dictionaryDocumentType.Add("PA", "7");
-            _dictionaryDocumentType.Add("RC", "2");
-            _dictionaryDocumentType.Add("SC", "4");
-            _dictionaryDocumentType.Add("CD", "9");
-            _dictionaryDocumentType.Add("NV", "1423");
-            _dictionaryDocumentType.Add("MS", "1424");
-            _dictionaryDocumentType.Add("AS", "2825");
-            _dictionaryDocumentType.Add("UN", "3271");
-
-            foreach (ENT_StructureRes4505En file in _entity)
+            if (listError == null)
             {
-                if (!_dictionary4505.ContainsKey($"{file.IdentificationType}_{file.DocumentNumber}"))
-                    _dictionary4505.Add($"{file.IdentificationType}_{file.DocumentNumber}", file);
-
-                if (_dictionaryDocumentType.ContainsKey(file.IdentificationType))
-                {
-                    var documentTypeDictionary = _dictionaryDocumentType[file.IdentificationType];
-
-                    var documentTypeBD = listDocumentTypesDB.Where(d => d.Id == documentTypeDictionary).FirstOrDefault();
-                    // Agrega personas para consultarlas posteriormente
-                    personList.Add(new { DocumentType = documentTypeBD.Id.ToString(), Identification = file.DocumentNumber, Index = index, typeId = file.IdentificationType });
-                }
-                index++;
+                listError = new List<string>();
             }
-            List<dynamic> listpersonByPopulation = new List<dynamic>();
-            USR_ValidateAffiliatePersonResolutions(personList, adapterId, listErrorsDocumentNumber, listpersonByPopulation, IdTypePopulation, _entity, _dictionaryDocumentType);
-            var newlist = listErrorsDocumentNumber.Select(x => x.Replace("item", "Fila")).ToList();
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                listError.Add("El nombre del Archivo no es Valido");
+                return listError.Count == 0;
+            }
+
+            if (!System.IO.Path.GetExtension(fileName).Equals(".txt"))
+            {
+                listError.Add("La extension del archivo no es valida");
+                return listError.Count == 0;
+            }
 
 
-            listErrors.AddRange(newlist);
-            return index;
+            string[] fileNameArreay = fileName.Split('_');
+
+            if (fileNameArreay.Length != 3)
+            {
+                listError.Add("El nombre del archivo no es Valido");
+                return listError.Count == 0;
+            }
+
+            var yyyymmdd = new Regex(@"^(?:(?:(?:(?:(?:[13579][26]|[2468][048])00)|(?:[0-9]{2}(?:(?:[13579][26])|(?:[2468][048]|0[48]))))(?:(?:(?:09|04|06|11)(?:0[1-9]|1[0-9]|2[0-9]|30))|(?:(?:01|03|05|07|08|10|12)(?:0[1-9]|1[0-9]|2[0-9]|3[01]))|(?:02(?:0[1-9]|1[0-9]|2[0-9]))))|(?:[0-9]{4}(?:(?:(?:09|04|06|11)(?:0[1-9]|1[0-9]|2[0-9]|30))|(?:(?:01|03|05|07|08|10|12)(?:0[1-9]|1[0-9]|2[0-9]|3[01]))|(?:02(?:[01][0-9]|2[0-8])))))$");
+
+            if (!yyyymmdd.IsMatch(fileNameArreay[0]))
+            {
+                listError.Add("La fecha en el nombre del Archivo no es valida (verifique el formato)");
+                return listError.Count == 0;
+            }
+
+            bool fecha = DateTime.TryParseExact(fileNameArreay[0], "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateTime);
+
+            if (!fecha)
+            {
+                listError.Add("La fecha en el nombre del Archivo no es valida");
+            }
+
+            if (fileNameArreay[1].Length != codeEPSlength && fileNameArreay[1].Length != 5)
+            {
+                listError.Add($"Codigo de EPS {fileNameArreay[1].Length} | {codeEPSlength}");
+            }
+
+            if (!fileNameArreay[2].Replace(".txt", "").Trim().Equals(resolutionCode))
+            {
+                listError.Add("El nombre del archivo no es valido");
+            }
+
+            return listError.Count == 0;
         }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="personList">personList</param>
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="listErrors">listErrors</param>
-        /// <param name="listpersonByPopulation">listpersonByPopulation</param>
-        /// <param name="IdTypePopulation">IdTypePopulation</param>
-        /// <param name="_entity">_entity</param>
-        /// <param name="_dictionaryDocumentType">_dictionaryDocumentType</param>
-        public static List<string> USR_ValidateAffiliatePersonResolutions(List<dynamic> personList, long adapterId, List<string> listErrors, List<dynamic> listpersonByPopulation, long IdTypePopulation, List<ENT_StructureRes4505En> _entity, dynamic _dictionaryDocumentType)
-        {
-            //Consulta en la tabla person
-            ENT_ActionResult persons = USR_GetPersonByDocumentNumber(adapterId, personList);
-            if (persons.IsError) throw new Exception(persons.ErrorMessage);
-            List<dynamic> listpersonByDocumentNumber = JsonConvert.DeserializeObject<List<dynamic>>(persons.Result.ToString());
-            Dictionary<string, dynamic> dictionarypersonByDocumentNumber = listpersonByDocumentNumber.ToDictionary(x => $"{x.IdDocumentType}_{x.DocumentNumber}", x => x);
-
-            //Valida tipo de poblacion
-            var res = (from p in listpersonByDocumentNumber select p.Id).ToList();
-            listpersonByPopulation.Add(res);
-            ENT_ActionResult personsPopulation = USR_GetPersonByTypePopulation(adapterId, listpersonByPopulation);
-            if (personsPopulation.IsError) throw new Exception(persons.ErrorMessage);
-            List<ENT_Person4505> listpersonBypersonsPopulation = JsonConvert.DeserializeObject<List<ENT_Person4505>>(personsPopulation.Result.ToString());
-
-            int index = 1;
-            foreach (var ent in _entity)
-            {
-                var documentTypeDictionary = _dictionaryDocumentType[ent.IdentificationType];
-
-                if (listpersonBypersonsPopulation.Exists(f => f.IdDocumentType == documentTypeDictionary && f.DocumentNumber == ent.DocumentNumber))
-                {
-                    if (listpersonBypersonsPopulation.Exists(f => f.DocumentNumber == ent.DocumentNumber && f.IdTypePopulation != IdTypePopulation.ToString()))
-                        listErrors.Add(string.Concat($"Fila {index}", "|El tipo de afiliado en el archivo no corresponde al tipo de afiliado seleccionado en la plantilla ", $" numero {ent.DocumentNumber}"));
-                }
-                index++;
-            }
-
-            List<dynamic> personsNoExist = new List<dynamic>();
-
-            foreach (var person in personList)
-            {
-                if (!dictionarypersonByDocumentNumber.ContainsKey($"{person.DocumentType}_{person.Identification}"))
-                {
-                    personsNoExist.Add(person);
-
-                }
-            }
-            if (personsNoExist.Count > 0)
-            {
-
-                ENT_ActionResult novelty = USR_GetNoveltyDetail(adapterId, personsNoExist);
-                if (novelty.IsError)
-                {
-                    throw new Exception(novelty.ErrorMessage);
-                }
-                List<dynamic> novChangeNumDoc = JsonConvert.DeserializeObject<List<dynamic>>(novelty.Result.ToString());
-                if (novChangeNumDoc.Count > 0)
-                {
-                    foreach (var itemNoveltyDetail in novChangeNumDoc)
-                    {
-                        var novelties = USR_GetNoveltiesTypeDocumentByPerson(adapterId, itemNoveltyDetail.IdNovelty.ToString());
-                        if (novelties.IsError)
-                        {
-                            throw new Exception(novelties.ErrorMessage);
-                        }
-                        List<dynamic> listNovelties = JsonConvert.DeserializeObject<List<dynamic>>(novelties.Result.ToString());
-                        foreach (var itemNovelty in listNovelties)
-                        {
-                            var person = USR_GetPersonByTypeAndDocumentNumber(adapterId, itemNovelty.NewValue.ToString(), itemNoveltyDetail.NewValue.ToString());
-                            if (person.IsError)
-                            {
-                                throw new Exception(person.ErrorMessage);
-                            }
-                            List<dynamic> personBD = JsonConvert.DeserializeObject<List<dynamic>>(person.Result.ToString());
-                            if (personBD != null && personBD.Count > 0)
-                            {
-                                personsNoExist.RemoveAll(d => d.Identification == itemNoveltyDetail.OldValue.ToString());
-                                break;
-                            }
-                        }
-                    }
-
-                }
-                //Valida cambio de tipo de documento       
-
-                var novelties2 = USR_GetNoveltiesAffiliate(adapterId, personsNoExist);
-                if (novelties2.IsError)
-                {
-                    throw new Exception(novelties2.ErrorMessage);
-                }
-                List<dynamic> listNovelties2 = JsonConvert.DeserializeObject<List<dynamic>>(novelties2.Result.ToString());
-                Dictionary<string, dynamic> dictionaryNovelties2 = listNovelties2.ToDictionary(x => $"{x.OldValue}_{x.DocumentNumber}", x => x);
-                List<Tuple<int, string>> ForDelete = new List<Tuple<int, string>>();
-
-                foreach (var itemPerson in personsNoExist)
-                {
-                    if (dictionaryNovelties2.ContainsKey($"{itemPerson.DocumentType}_{itemPerson.Identification}"))
-                    {
-                        Tuple<int, string> tuple = new Tuple<int, string>(int.Parse(itemPerson.DocumentType), itemPerson.Identification);
-
-                        ForDelete.Add(tuple);
-                    }
-                }
-
-                foreach (var item in ForDelete)
-                {
-                    personsNoExist.RemoveAll(d => d.Identification == item.Item2);
-                }
-
-                foreach (var item in personsNoExist)
-                {
-                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification} registrada el|no existe");
-                }
-            }
-
-            return listErrors;
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="sourceList">sourceList</param>
-        /// <param name="maxSubItems">maxSubItems</param>
-        public static dynamic USR_SplitList4505(List<ENT_StructureRes4505En> sourceList, long maxSubItems)
-        {
-            return sourceList
-                .Select((x, i) => new { Index = i, Value = x })
-                .GroupBy(x => x.Index / maxSubItems)
-                .Select(x => x.Select(v => v.Value).ToList())
-                .ToList();
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="fileName">fileName</param>
-        /// <param name="cutOffDate">cutOffDate</param>
-        /// <param name="code">code</param>
-        /// <param name="idOperator">idOperator</param>
-        /// <param name="caseNumber">caseNumber</param>
-        /// <param name="initialDate">initialDate</param>
-        /// <param name="endDate">endDate</param>
-        /// <param name="idPopulation">idPopulation</param>
-        /// <param name="listFileEntity">listFileEntity</param>
-        public static ENT_ActionResult USR_Save4505File(string fileName, string cutOffDate, string code, long idOperator, string caseNumber, string initialDate, string endDate, long idPopulation, dynamic listFileEntity)
-        {
-            dynamic head = new
-            {
-                Module = fileName.Substring(0, 3),
-                Source = fileName.Substring(3, 3),
-                Information = fileName.Substring(6, 4),
-                CutOffDate = cutOffDate,
-                IdentificationTypeEntity = fileName.Substring(18, 2),
-                IdentificationNumberEntity = fileName.Substring(20, 12),
-                RegimeType = fileName.Substring(32, 1),
-                ConsecutiveFile = fileName.Substring(33, 2),
-                Code = code,
-                ProcessDate = DateTime.Now,
-                InitialDate = initialDate,
-                EndDate = endDate,
-                TotalRecord = listFileEntity.Count,
-                IdOperator = idOperator,
-                CaseNumber = caseNumber,
-                IdTypePopulation = idPopulation,
-            };
-
-
-            string urlHead = "http://190.217.17.108:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505";
-            ENT_ActionResult resultHead = SYS_WSPOST(urlHead, head, null, null);
-
-            dynamic head2 = USR_SplitList4505(listFileEntity, 4000);
-
-            if (resultHead.IsSuccessful)
-            {
-                ENT_ActionResult result = new ENT_ActionResult();
-                string url = "http://190.217.17.108:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505Lotes";
-                foreach (var listaLotes in head2)
-                {
-                    dynamic head3 = new
-                    {
-                        ListResolutionDetail = listaLotes,
-                        HeadDetail = resultHead.Result
-                    };
-                    result = SYS_WSPOST(url, head3, null, null);
-                }
-                return result;
-            }
-            return resultHead;
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="Parameters4505">Entidad 4505 parametros enviados desde el motor</param>
-        public static dynamic USR_Main4505(ENT_parameters4505 Parameters4505)
-        {
-            //Constantes
-            const string lineSeparator = "\r\n";
-            const string columnSeparator = "|";
-            const int ColumnLength = 119;
-            const string folder = "Resolucion4505ResultEstructura";
-
-            //Validacion de parametros
-            if (Parameters4505 == null) throw new ArgumentException($"La entidad no puede ser vacía");
-            if (Parameters4505.LibraryId == 0) throw new ArgumentException($"El Id de la Libreria no puede estar vacío");
-            if (Parameters4505.CompanyId == 0) throw new ArgumentException($"El Id de la Compañia no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.CaseNumber)) throw new ArgumentException($"El numero de Caso no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.UserCode)) throw new ArgumentException($"El Codigo del usuario no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.FileId)) throw new ArgumentException($"El Id del Archivo no puede estar vacío");
-
-            var listErrors = new List<string>();
-            var resultValidation = USR_ValidateRule4505(lineSeparator, columnSeparator, Parameters4505.CompanyId, Parameters4505.LibraryId, Parameters4505.FileId, ColumnLength, typeof(ENT_StructureRes4505En), listErrors);
-
-            if (listErrors.Count > 0)
-            {
-                //Lista retorno de archivo de errores
-                List<string> Listkey = new List<string>();
-                List<string> ListValue = new List<string>();
-                int conteo = 1;
-                foreach (var error in listErrors)
-                {
-                    string data = error;
-                    string[] lines = data.Split(Convert.ToChar(columnSeparator));
-                    if (lines.Length == 1)
-                    {
-                        Listkey.Add(string.Concat($"Error {conteo}"));
-                        ListValue.Add(string.Concat(lines[0].Trim(), $" verifique el archivo"));
-                        conteo++;
-                    }
-                    else if (lines.Length > 1 && lines.Length <= 3)
-                    {
-                        Listkey.Add(lines[0]);
-                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim()));
-                    }
-                    else
-                    {
-                        Listkey.Add(lines[0]);
-                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim(), columnSeparator, lines[3].Trim()));
-                    }
-                }
-
-                //Log de errores expresiones regulares
-                string pathFile = string.Empty;
-                if (ListValue.Count != 0)
-                    pathFile = USR_GenericSaveLog4505(new Dictionary<List<string>, List<string>>() { [Listkey] = ListValue }, folder);
-                else
-                    pathFile = USR_GenericSaveLog(new Dictionary<string, List<string>>() { ["4505"] = Listkey }, folder);
-
-
-                var attach = USR_WSAttachFileToProcess(pathFile, Parameters4505.UserCode, Parameters4505.CompanyId.ToString(), Parameters4505.CaseNumber, "4505");
-                if (attach.IsError)
-                {
-                    attach.ErrorMessage = "No se pudo asociar el archivo al proceso, ya que el archivo TXT no fue encontrado con los datos suministrados, favor verificar si se cargo en la plantilla de manera correcta.";
-                    return attach;
-                }
-                return new ENT_ActionResult() { FileName = attach.FileName, IsError = true, ErrorMessage = "Hubo errores en la validación " };
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultValidation.Result, FileName = resultValidation.FileName };
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idPersons">idPersons</param>
-        public static ENT_ActionResult USR_GetPersonByTypePopulation(long adapterId, dynamic idPersons)
-        {
-            StringBuilder sbPersonByNumber = new StringBuilder();
-            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
-            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
-            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
-            foreach (var idPerson in idPersons[0])
-                sbPersonByNumber.Append($"<id>{idPerson}</id>");
-            sbPersonByNumber.Append(" </ids></root> ';");
-            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
-            sbPersonByNumber.Append(" SELECT  DISTINCT IdPerson,IdTypePopulation,IdDocumentType,DocumentNumber  FROM affiliate A  WITH (NOLOCK)  INNER JOIN Person B ON A.IdPerson = B.Id WHERE A.IdPerson IN ( ");
-            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(40) '.')); ");
-            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene persona por tipo y numero de identificación
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idDocumentType">idDocumentType</param>
-        /// <param name="documentNumber">documentNumber</param>
-        public static ENT_ActionResult USR_GetPersonByTypeAndDocumentNumber(long adapterId, string idDocumentType, string documentNumber)
-        {
-            var sql = new StringBuilder();
-            sql.Append(" SELECT IdDocumentType, DocumentNumber ");
-            sql.Append(" FROM Person WITH (NOLOCK)");
-            sql.Append($" WHERE IdDocumentType = {idDocumentType} AND DocumentNumber = '{documentNumber}'");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene persona por tipo de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="documentsNumbers">documentsNumbers</param>
-        public static ENT_ActionResult USR_GetPersonByDocumentNumber(long adapterId, dynamic documentsNumbers)
-        {
-            StringBuilder sbPersonByNumber = new StringBuilder();
-            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
-            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
-            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
-            foreach (var documentNumber in documentsNumbers)
-                sbPersonByNumber.Append($"<id>{documentNumber.Identification}</id>");
-            sbPersonByNumber.Append(" </ids></root> ';");
-            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
-            sbPersonByNumber.Append(" SELECT  DISTINCT Id,IdDocumentType, DocumentNumber FROM Person WITH (NOLOCK) WHERE DocumentNumber IN( ");
-            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(15) '.')); ");
-            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-
-        }
-        /// <sumary>
-        /// Obtiene detalles de novedad
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="personsNoExist">personsNoExist</param>
-        public static ENT_ActionResult USR_GetNoveltyDetail(long adapterId, dynamic personsNoExist)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append(" DECLARE @x xml; ");
-            sql.Append(" SET @x = '<root><ids> ");
-            foreach (var documentNumber in personsNoExist)
-                sql.Append($"<id>{documentNumber.Identification}</id>");
-            sql.Append(" </ids></root> ';");
-            sql.Append("  SELECT IdNovelty, OldValue, NewValue  FROM NoveltyDetail WITH (NOLOCK) WHERE OldValue IN(select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)) AND FieldName='Número de Documento'; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene novedades por tipo de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idNovelty">idNovelty</param>
-        public static ENT_ActionResult USR_GetNoveltiesTypeDocumentByPerson(long adapterId, string idNovelty)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append($"select * from NoveltyDetail where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate = (select IdAffiliate from Novelty where Id = '{idNovelty}'))");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene las novedades por afiliado
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="personList">personList</param>
-        public static ENT_ActionResult USR_GetNoveltiesAffiliate(long adapterId, dynamic personList)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append(" DECLARE @x xml; ");
-            sql.Append(" SET @x = '<root><ids> ");
-            foreach (var documentNumber in personList)
-                sql.Append($"<id>{documentNumber.Identification}</id>");
-            sql.Append(" </ids></root> ';");
-
-            sql.Append("select NoveltyDetail.IdNovelty, Person.IdDocumentType, Person.DocumentNumber, NoveltyDetail.FieldName, NoveltyDetail.OldValue, NoveltyDetail.NewValue, Novelty.FiscalEffectDate ");
-            sql.Append("from NoveltyDetail inner join Novelty on Novelty.Id = NoveltyDetail.IdNovelty inner join Affiliate on Novelty.IdAffiliate = Affiliate.Id inner join Person on Person.Id = Affiliate.IdPerson ");
-            sql.Append($"where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate in (select Id from Affiliate where IdPerson in (select Id from Person where DocumentNumber in (select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)))))");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene tipos de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        public static ENT_ActionResult USR_GetDocumentTypes(long adapterId)
-        {
-            var sql = new StringBuilder();
-            sql.Append(" SELECT Id, Code ");
-            sql.Append(" FROM TypeDetail WITH (NOLOCK)");
-            sql.Append(" WHERE IdTypeHead = 1");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="dictionaryResult">dictionaryResult</param>
-        /// <param name="folder">folder</param>
-        public static string USR_GenericSaveLog4505(dynamic dictionaryResult, string folder)
-        {
-            try
-            {
-                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
-
-                if (!Directory.Exists(pathName))
-                    Directory.CreateDirectory(pathName);
-
-                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
-
-                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    sw.WriteLine("Fila;Mensaje");
-                    foreach (var file in dictionaryResult)
-                    {
-                        for (int i = 0; i < file.Value.Count; i++)
-                        {
-                            sw.WriteLine($"{file.Key[i]};{file.Value[i]}");
-                        }
-                        sw.Flush();
-                    }
-                }
-
-                return pathName;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Guarda log de un archivo 
-        /// </sumary> 
-        /// <param name="dictionaryResult">Dictionary con entidades a escribir en el log</param>
-        /// <param name="folder">carpeta donde se va a guardar el archivo</param>
-        public static string USR_GenericSaveLog(dynamic dictionaryResult, string folder)
-        {
-            try
-            {
-
-                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
-
-                if (!Directory.Exists(pathName))
-                    Directory.CreateDirectory(pathName);
-
-                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
-
-                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    sw.WriteLine("ARCHIVO;MENSAJE");
-                    foreach (var file in dictionaryResult)
-                    {
-                        for (int i = 0; i < file.Value.Count; i++)
-                        {
-                            sw.WriteLine($"{file.Key};{file.Value[i]}");
-                        }
-                        sw.Flush();
-                    }
-                }
-
-                return pathName;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="remoteFile">Ruta destino de archivo a subir</param>
-        /// <param name="localFile">FileStream de archivo a subir</param>
-        public static string USR_FtpUpload(string remoteFile, dynamic localFile)
-        {
-            try
-            {
-                string ftp = "190.217.17.108";
-                string userName = "OpheliaDcom";
-                string password = "F1dupr3v1s0r4*!/#";
-
-                string host = ("ftp://" + ftp);
-
-                if (string.IsNullOrEmpty(ftp) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
-                {
-                    throw new ArgumentNullException("ftp,userName,password");
-                }
-                int bufferSize = 2048;
-                /* Create an FTP Request */
-                FtpWebRequest ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
-                /* Log in to the FTP Server with the User Name and Password Provided */
-                ftpRequest.Credentials = new NetworkCredential(userName, password);
-                /* When in doubt, use these options */
-                ftpRequest.UseBinary = true;
-                ftpRequest.UsePassive = true;
-                ftpRequest.KeepAlive = true;
-                /* Specify the Type of FTP Request */
-                ftpRequest.Method = WebRequestMethods.Ftp.UploadFile;
-                /* Establish Return Communication with the FTP Server */
-                Stream ftpStream = ftpRequest.GetRequestStream();
-                /* Buffer for the Downloaded Data */
-                localFile.Position = 0;
-                byte[] byteBuffer = new byte[bufferSize];
-                int bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
-                /* Upload the File by Sending the Buffered Data Until the Transfer is Complete */
-                while (bytesSent != 0)
-                {
-                    ftpStream.Write(byteBuffer, 0, bytesSent);
-                    bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
-                }
-
-                /* Resource Cleanup */
-                localFile.Close();
-                ftpStream.Close();
-                using (FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse())
-                {
-                    ftpRequest = null;
-                    return response.StatusDescription;
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="listErrors">Variable de parámetro de función vacía</param>
-        /// <param name="index">index</param>
-        /// <param name="listaQualification">listaQualification</param>
-        /// <param name="listOccupationCode">listOccupationCode</param>
-        /// <param name="ent">ent</param>
-        public static dynamic USR_FieldsValidate4505(List<string> listErrors, long index, List<dynamic> listaQualification, List<dynamic> listOccupationCode, ENT_StructureRes4505En ent)
-        {
-            //Codigos de habilitacion  => 
-            string pipe = "|";
-
-            //Valida codigo de habilitacion campo 2
-            if (!(ent.HabilitationCode.Equals("0") || ent.HabilitationCode.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCode) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 2"));
-
-            //Valida codigo HabilitationCodeCytology campo 90
-            if (!(ent.HabilitationCodeCytology.Equals("0") || ent.HabilitationCodeCytology.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeCytology) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 90"));
-
-            //Valida codigo HabilitationCodeCytology campo 92
-            if (!(ent.HabilitationCodeColposcopy.Equals("0") || ent.HabilitationCodeColposcopy.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeColposcopy) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 92"));
-
-            //Valida codigo HabilitationCodeCytology campo 95
-            if (!(ent.HabilitationCodeBiopsy.Equals("0") || ent.HabilitationCodeBiopsy.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeBiopsy) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 95"));
-
-            //Valida codigo HabilitationCodeCytology campo 98
-            if (!(ent.HabilitationCodeMammography.Equals("0") || ent.HabilitationCodeMammography.Equals("0")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeMammography) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 98"));
-
-            //Valida codigo de Ocupacion
-            if (!(ent.OccupationCode.Equals("9999") || ent.OccupationCode.Equals("9998")))
-                if (listOccupationCode.FirstOrDefault(x => x.Code == ent.OccupationCode) == null) listErrors.Add(string.Concat($"Fila {index + 1}", $"{pipe}", "No existe el codigo de Ocupacion en la BD o es invalido variable 12"));
-
-            return true;
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web
-        /// </sumary> 
-        /// <param name="method">Método del servicio</param>
-        /// <param name="url">Url del servicio web</param>
-        /// <param name="parameters">Parámetros del método a consumir</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        /// <param name="fileFullPath">fileFullPath</param>
-        /// <param name="minTimeout">Minutos de timeout</param>
-        public static ENT_ActionResult SYS_WSRequest(string method, string url, object parameters, dynamic headers, string fileFullPath, double? minTimeout)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(url))
-                {
-                    throw new ArgumentNullException("method or url");
-                }
-
-                HttpMethod httpMethod = new HttpMethod(method);
-                double min = minTimeout != null && minTimeout > 0 ? (double)minTimeout : 3;
-                using (HttpClient Client = new HttpClient { Timeout = TimeSpan.FromMinutes(min) })
-                {
-                    using (var request = new HttpRequestMessage(httpMethod, url))
-                    {
-                        if (parameters != null)
-                        {
-                            request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
-                        }
-
-                        if (headers != null)
-                        {
-                            foreach (KeyValuePair<String, String> header in headers)
-                            {
-                                request.Headers.Add(header.Key, header.Value);
-                            }
-                        }
-
-                        using (HttpResponseMessage response = Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result)
-                        {
-                            using (HttpContent content = response.Content)
-                            {
-                                string result = content.ReadAsStringAsync().Result;
-
-                                if (response.StatusCode == HttpStatusCode.OK)
-                                {
-                                    var resultWs = JsonConvert.DeserializeObject<dynamic>(result);
-                                    if ((bool)resultWs.IsError)
-                                    {
-                                        return new ENT_ActionResult() { IsError = true, ErrorMessage = resultWs.ErrorMessage };
-                                    }
-                                    return new ENT_ActionResult() { IsSuccessful = resultWs.IsSucessfull, Result = resultWs.Result };
-
-                                }
-
-                                else
-                                    return new ENT_ActionResult() { IsError = true, ErrorMessage = result };
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.InnerException.Message + ex.StackTrace };
-            }
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web POST
-        /// </sumary> 
-        /// <param name="url">Url del Servicio Web</param>
-        /// <param name="parameters">Parámetros del servicio</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        /// <param name="fileFullPath">fileFullPath</param>
-        public static ENT_ActionResult SYS_WSPOST(string url, object parameters, dynamic headers, string fileFullPath)
-        {
-            ENT_ActionResult result = new ENT_ActionResult();
-            result = SYS_WSRequest("POST", url, parameters, headers, fileFullPath, null);
-            return result;
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web GET
-        /// </sumary> 
-        /// <param name="url">Url del servicio Web</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        public static ENT_ActionResult SYS_WSGET(string url, dynamic headers)
-        {
-            ENT_ActionResult result = new ENT_ActionResult();
-            result = SYS_WSRequest("GET", url, null, headers, null, null);
-            return result;
-        }
-        /// <sumary>
-        /// Ejecuta una consulta Sql con el adaptador
-        /// </sumary> 
-        /// <param name="adapterId">Id del adaptador</param>
-        /// <param name="queryBD">Consulta Sql</param>
-        public static ENT_ActionResult SYS_WSExecuteQuery(long adapterId, string queryBD)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(queryBD))
-                {
-                    throw new ArgumentNullException("queryBD");
-                }
-
-                var plainTextBytes = Encoding.UTF8.GetBytes(queryBD);
-                var query = Convert.ToBase64String(plainTextBytes);
-
-                ENT_ActionResult result = new ENT_ActionResult();
-                string url = "http://190.217.17.108:8080/api/api/Adapter/ExecuteQuery";
-                dynamic jsonObject = new JObject();
-                jsonObject.adapterId = adapterId;
-                jsonObject.queryBD = query;
-                result = SYS_WSPOST(url, jsonObject, null, null);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
-            }
-        }
-        /// <sumary>
-        /// Prototipo de verificación
-        /// </sumary> 
-        /// <param name="rules">Reglas a evaluar</param>
-        public static object SYS_VerificationPrototype(object rules)
-        {
-            IEnumerable<Func<object>> funcs = ((IEnumerable<Func<object>>)rules);
-
-            string messages = string.Empty;
-            bool result = true;
-            foreach (Func<object> rul in funcs)
-            {
-                var r = rul();
-                if (!r.GetPropertyValue<bool>("IsValid"))
-                {
-                    result = false;
-                    messages += "* " + r.GetPropertyValue<string>("Message") + "\n\r";
-                }
-            }
-
-            return new { Result = result, Messages = messages };
-        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Convierte los registros de una archivo a una lista de entidades
         /// </sumary> 
@@ -23616,6 +23108,704 @@ namespace OpheliaSuiteV2.BRMRuntime
                 throw;
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idPersons">idPersons</param>
+        public static ENT_ActionResult USR_GetPersonByTypePopulation(long adapterId, dynamic idPersons)
+        {
+            StringBuilder sbPersonByNumber = new StringBuilder();
+            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
+            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
+            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
+            foreach (var idPerson in idPersons[0])
+                sbPersonByNumber.Append($"<id>{idPerson}</id>");
+            sbPersonByNumber.Append(" </ids></root> ';");
+            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
+            sbPersonByNumber.Append(" SELECT  DISTINCT IdPerson,IdTypePopulation,IdDocumentType,DocumentNumber  FROM affiliate A  WITH (NOLOCK)  INNER JOIN Person B ON A.IdPerson = B.Id WHERE A.IdPerson IN ( ");
+            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(40) '.')); ");
+            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Ejecuta una consulta Sql con el adaptador
+        /// </sumary> 
+        /// <param name="adapterId">Id del adaptador</param>
+        /// <param name="queryBD">Consulta Sql</param>
+        public static ENT_ActionResult SYS_WSExecuteQuery(long adapterId, string queryBD)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(queryBD))
+                {
+                    throw new ArgumentNullException("queryBD");
+                }
+
+                var plainTextBytes = Encoding.UTF8.GetBytes(queryBD);
+                var query = Convert.ToBase64String(plainTextBytes);
+
+                ENT_ActionResult result = new ENT_ActionResult();
+                string url = "http://davincilb.ophelia.co:8080/api/api/Adapter/ExecuteQuery";
+                dynamic jsonObject = new JObject();
+                jsonObject.adapterId = adapterId;
+                jsonObject.queryBD = query;
+                result = Helper.SYS_WSPOST(url, jsonObject, null, null);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="personList">personList</param>
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="listErrors">listErrors</param>
+        /// <param name="listpersonByPopulation">listpersonByPopulation</param>
+        /// <param name="IdTypePopulation">IdTypePopulation</param>
+        /// <param name="_entity">_entity</param>
+        /// <param name="_dictionaryDocumentType">_dictionaryDocumentType</param>
+        public static List<string> USR_ValidateAffiliatePersonResolutions(List<dynamic> personList, long adapterId, List<string> listErrors, List<dynamic> listpersonByPopulation, long IdTypePopulation, List<ENT_StructureRes4505En> _entity, dynamic _dictionaryDocumentType)
+        {
+            //Consulta en la tabla person
+            ENT_ActionResult persons = Helper.USR_GetPersonByDocumentNumber(adapterId, personList);
+            if (persons.IsError) throw new Exception(persons.ErrorMessage);
+            List<dynamic> listpersonByDocumentNumber = JsonConvert.DeserializeObject<List<dynamic>>(persons.Result.ToString());
+            Dictionary<string, dynamic> dictionarypersonByDocumentNumber = listpersonByDocumentNumber.ToDictionary(x => $"{x.IdDocumentType}_{x.DocumentNumber}", x => x);
+
+            //Valida tipo de poblacion
+            var res = (from p in listpersonByDocumentNumber select p.Id).ToList();
+            listpersonByPopulation.Add(res);
+            ENT_ActionResult personsPopulation = Helper.USR_GetPersonByTypePopulation(adapterId, listpersonByPopulation);
+            if (personsPopulation.IsError) throw new Exception(persons.ErrorMessage);
+            List<ENT_Person4505> listpersonBypersonsPopulation = JsonConvert.DeserializeObject<List<ENT_Person4505>>(personsPopulation.Result.ToString());
+
+            int index = 1;
+            foreach (var ent in _entity)
+            {
+                var documentTypeDictionary = _dictionaryDocumentType[ent.IdentificationType];
+
+                if (listpersonBypersonsPopulation.Exists(f => f.IdDocumentType == documentTypeDictionary && f.DocumentNumber == ent.DocumentNumber))
+                {
+                    if (listpersonBypersonsPopulation.Exists(f => f.DocumentNumber == ent.DocumentNumber && f.IdTypePopulation != IdTypePopulation.ToString()))
+                        listErrors.Add(string.Concat($" Fila {index}", "|El tipo de afiliado en el archivo no corresponde al tipo de afiliado seleccionado en la plantilla ", $" numero {ent.DocumentNumber}"));
+                }
+                index++;
+            }
+
+            List<dynamic> personsNoExist = new List<dynamic>();
+
+            foreach (var person in personList)
+            {
+                if (!dictionarypersonByDocumentNumber.ContainsKey($"{person.DocumentType}_{person.Identification}"))
+                {
+                    personsNoExist.Add(person);
+
+                }
+            }
+            if (personsNoExist.Count > 0)
+            {
+
+                ENT_ActionResult novelty = Helper.USR_GetNoveltyDetail(adapterId, personsNoExist);
+                if (novelty.IsError)
+                {
+                    throw new Exception(novelty.ErrorMessage);
+                }
+                List<dynamic> novChangeNumDoc = JsonConvert.DeserializeObject<List<dynamic>>(novelty.Result.ToString());
+                if (novChangeNumDoc.Count > 0)
+                {
+                    foreach (var itemNoveltyDetail in novChangeNumDoc)
+                    {
+                        var novelties = Helper.USR_GetNoveltiesTypeDocumentByPerson(adapterId, itemNoveltyDetail.IdNovelty.ToString());
+                        if (novelties.IsError)
+                        {
+                            throw new Exception(novelties.ErrorMessage);
+                        }
+                        List<dynamic> listNovelties = JsonConvert.DeserializeObject<List<dynamic>>(novelties.Result.ToString());
+                        foreach (var itemNovelty in listNovelties)
+                        {
+                            var person = Helper.USR_GetPersonByTypeAndDocumentNumber(adapterId, itemNovelty.NewValue.ToString(), itemNoveltyDetail.NewValue.ToString());
+                            if (person.IsError)
+                            {
+                                throw new Exception(person.ErrorMessage);
+                            }
+                            List<dynamic> personBD = JsonConvert.DeserializeObject<List<dynamic>>(person.Result.ToString());
+                            if (personBD != null && personBD.Count > 0)
+                            {
+                                personsNoExist.RemoveAll(d => d.Identification == itemNoveltyDetail.OldValue.ToString());
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                //Valida cambio de tipo de documento       
+
+                var novelties2 = Helper.USR_GetNoveltiesAffiliate(adapterId, personsNoExist);
+                if (novelties2.IsError)
+                {
+                    throw new Exception(novelties2.ErrorMessage);
+                }
+                List<dynamic> listNovelties2 = JsonConvert.DeserializeObject<List<dynamic>>(novelties2.Result.ToString());
+                Dictionary<string, dynamic> dictionaryNovelties2 = listNovelties2.ToDictionary(x => $"{x.OldValue}_{x.DocumentNumber}", x => x);
+                List<Tuple<int, string>> ForDelete = new List<Tuple<int, string>>();
+
+                foreach (var itemPerson in personsNoExist)
+                {
+                    if (dictionaryNovelties2.ContainsKey($"{itemPerson.DocumentType}_{itemPerson.Identification}"))
+                    {
+                        Tuple<int, string> tuple = new Tuple<int, string>(int.Parse(itemPerson.DocumentType), itemPerson.Identification);
+
+                        ForDelete.Add(tuple);
+                    }
+                }
+
+                foreach (var item in ForDelete)
+                {
+                    personsNoExist.RemoveAll(d => d.Identification == item.Item2);
+                }
+
+                foreach (var item in personsNoExist)
+                {
+                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification} registrada el|no existe");
+                }
+            }
+
+            return listErrors;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene persona por tipo y numero de identificación
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idDocumentType">idDocumentType</param>
+        /// <param name="documentNumber">documentNumber</param>
+        public static ENT_ActionResult USR_GetPersonByTypeAndDocumentNumber(long adapterId, string idDocumentType, string documentNumber)
+        {
+            var sql = new StringBuilder();
+            sql.Append(" SELECT IdDocumentType, DocumentNumber ");
+            sql.Append(" FROM Person WITH (NOLOCK)");
+            sql.Append($" WHERE IdDocumentType = {idDocumentType} AND DocumentNumber = '{documentNumber}'");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene persona por tipo de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="documentsNumbers">documentsNumbers</param>
+        public static ENT_ActionResult USR_GetPersonByDocumentNumber(long adapterId, dynamic documentsNumbers)
+        {
+            StringBuilder sbPersonByNumber = new StringBuilder();
+            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
+            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
+            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
+            foreach (var documentNumber in documentsNumbers)
+                sbPersonByNumber.Append($"<id>{documentNumber.Identification}</id>");
+            sbPersonByNumber.Append(" </ids></root> ';");
+            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
+            sbPersonByNumber.Append(" SELECT  DISTINCT Id,IdDocumentType, DocumentNumber FROM Person WITH (NOLOCK) WHERE DocumentNumber IN( ");
+            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(15) '.')); ");
+            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene detalles de novedad
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="personsNoExist">personsNoExist</param>
+        public static ENT_ActionResult USR_GetNoveltyDetail(long adapterId, dynamic personsNoExist)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append(" DECLARE @x xml; ");
+            sql.Append(" SET @x = '<root><ids> ");
+            foreach (var documentNumber in personsNoExist)
+                sql.Append($"<id>{documentNumber.Identification}</id>");
+            sql.Append(" </ids></root> ';");
+            sql.Append("  SELECT IdNovelty, OldValue, NewValue  FROM NoveltyDetail WITH (NOLOCK) WHERE OldValue IN(select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)) AND FieldName='Número de Documento'; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene novedades por tipo de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idNovelty">idNovelty</param>
+        public static ENT_ActionResult USR_GetNoveltiesTypeDocumentByPerson(long adapterId, string idNovelty)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append($"select * from NoveltyDetail where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate = (select IdAffiliate from Novelty where Id = '{idNovelty}'))");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene las novedades por afiliado
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="personList">personList</param>
+        public static ENT_ActionResult USR_GetNoveltiesAffiliate(long adapterId, dynamic personList)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append(" DECLARE @x xml; ");
+            sql.Append(" SET @x = '<root><ids> ");
+            foreach (var documentNumber in personList)
+                sql.Append($"<id>{documentNumber.Identification}</id>");
+            sql.Append(" </ids></root> ';");
+
+            sql.Append("select NoveltyDetail.IdNovelty, Person.IdDocumentType, Person.DocumentNumber, NoveltyDetail.FieldName, NoveltyDetail.OldValue, NoveltyDetail.NewValue, Novelty.FiscalEffectDate ");
+            sql.Append("from NoveltyDetail inner join Novelty on Novelty.Id = NoveltyDetail.IdNovelty inner join Affiliate on Novelty.IdAffiliate = Affiliate.Id inner join Person on Person.Id = Affiliate.IdPerson ");
+            sql.Append($"where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate in (select Id from Affiliate where IdPerson in (select Id from Person where DocumentNumber in (select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)))))");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="_entity">_entity</param>
+        /// <param name="listErrors">listErrors</param>
+        /// <param name="index">index</param>
+        /// <param name="listDocumentTypesDB">listDocumentTypesDB</param>
+        /// <param name="IdTypePopulation">IdTypePopulation</param>
+        public static long USR_ValidateDocumentNumber4505(long adapterId, List<ENT_StructureRes4505En> _entity, List<string> listErrors, long index, List<dynamic> listDocumentTypesDB, long IdTypePopulation)
+        {
+            index = 1;
+            //Funcion valida si el usuario existe
+            List<dynamic> personList = new List<dynamic>();
+            var listErrorsDocumentNumber = new List<string>();
+            Dictionary<string, ENT_StructureRes4505En> _dictionary4505 = new Dictionary<string, ENT_StructureRes4505En>();
+            Dictionary<string, string> _dictionaryDocumentType = new Dictionary<string, string>();
+            _dictionaryDocumentType.Add("TI", "3");
+            _dictionaryDocumentType.Add("CC", "1");
+            _dictionaryDocumentType.Add("CE", "6");
+            _dictionaryDocumentType.Add("PA", "7");
+            _dictionaryDocumentType.Add("RC", "2");
+            _dictionaryDocumentType.Add("SC", "4");
+            _dictionaryDocumentType.Add("CD", "9");
+            _dictionaryDocumentType.Add("NV", "1423");
+            _dictionaryDocumentType.Add("MS", "1424");
+            _dictionaryDocumentType.Add("AS", "2825");
+            _dictionaryDocumentType.Add("UN", "3271");
+
+            foreach (ENT_StructureRes4505En file in _entity)
+            {
+                if (!_dictionary4505.ContainsKey($"{file.IdentificationType}_{file.DocumentNumber}"))
+                    _dictionary4505.Add($"{file.IdentificationType}_{file.DocumentNumber}", file);
+
+                if (_dictionaryDocumentType.ContainsKey(file.IdentificationType))
+                {
+                    var documentTypeDictionary = _dictionaryDocumentType[file.IdentificationType];
+
+                    var documentTypeBD = listDocumentTypesDB.Where(d => d.Id == documentTypeDictionary).FirstOrDefault();
+                    // Agrega personas para consultarlas posteriormente
+                    personList.Add(new { DocumentType = documentTypeBD.Id.ToString(), Identification = file.DocumentNumber, Index = index, typeId = file.IdentificationType });
+                }
+                index++;
+            }
+            List<dynamic> listpersonByPopulation = new List<dynamic>();
+            Helper.USR_ValidateAffiliatePersonResolutions(personList, adapterId, listErrorsDocumentNumber, listpersonByPopulation, IdTypePopulation, _entity, _dictionaryDocumentType);
+            var newlist = listErrorsDocumentNumber.Select(x => x.Replace("item", "Fila")).ToList();
+
+
+            listErrors.AddRange(newlist);
+            return index;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="sourceList">sourceList</param>
+        /// <param name="maxSubItems">maxSubItems</param>
+        public static dynamic USR_SplitList4505(List<ENT_StructureRes4505En> sourceList, long maxSubItems)
+        {
+            return sourceList
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / maxSubItems)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="fileName">fileName</param>
+        /// <param name="cutOffDate">cutOffDate</param>
+        /// <param name="code">code</param>
+        /// <param name="idOperator">idOperator</param>
+        /// <param name="caseNumber">caseNumber</param>
+        /// <param name="initialDate">initialDate</param>
+        /// <param name="endDate">endDate</param>
+        /// <param name="idPopulation">idPopulation</param>
+        /// <param name="listFileEntity">listFileEntity</param>
+        public static ENT_ActionResult USR_Save4505File(string fileName, string cutOffDate, string code, long idOperator, string caseNumber, string initialDate, string endDate, long idPopulation, dynamic listFileEntity)
+        {
+            dynamic head = new
+            {
+                Module = fileName.Substring(0, 3),
+                Source = fileName.Substring(3, 3),
+                Information = fileName.Substring(6, 4),
+                CutOffDate = cutOffDate,
+                IdentificationTypeEntity = fileName.Substring(18, 2),
+                IdentificationNumberEntity = fileName.Substring(20, 12),
+                RegimeType = fileName.Substring(32, 1),
+                ConsecutiveFile = fileName.Substring(33, 2),
+                Code = code,
+                ProcessDate = DateTime.Now,
+                InitialDate = initialDate,
+                EndDate = endDate,
+                TotalRecord = listFileEntity.Count,
+                IdOperator = idOperator,
+                CaseNumber = caseNumber,
+                IdTypePopulation = idPopulation,
+            };
+
+
+            string urlHead = "http://190.217.17.108:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505";
+            ENT_ActionResult resultHead = Helper.SYS_WSPOST(urlHead, head, null, null);
+
+            dynamic head2 = Helper.USR_SplitList4505(listFileEntity, 4000);
+
+            if (resultHead.IsSuccessful)
+            {
+                ENT_ActionResult result = new ENT_ActionResult();
+                string url = "http://190.217.17.108:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505Lotes";
+                foreach (var listaLotes in head2)
+                {
+                    dynamic head3 = new
+                    {
+                        ListResolutionDetail = listaLotes,
+                        HeadDetail = resultHead.Result
+                    };
+                    result = Helper.SYS_WSPOST(url, head3, null, null);
+                }
+                return result;
+            }
+            return resultHead;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="Parameters4505">Entidad 4505 parametros enviados desde el motor</param>
+        public static dynamic USR_Main4505(ENT_parameters4505 Parameters4505)
+        {
+            //Constantes
+            const string lineSeparator = "\r\n";
+            const string columnSeparator = "|";
+            const int ColumnLength = 119;
+            const string folder = "Resolucion4505ResultEstructura";
+
+            //Validacion de parametros
+            if (Parameters4505 == null) throw new ArgumentException($"La entidad no puede ser vacía");
+            if (Parameters4505.LibraryId == 0) throw new ArgumentException($"El Id de la Libreria no puede estar vacío");
+            if (Parameters4505.CompanyId == 0) throw new ArgumentException($"El Id de la Compañia no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.CaseNumber)) throw new ArgumentException($"El numero de Caso no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.UserCode)) throw new ArgumentException($"El Codigo del usuario no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.FileId)) throw new ArgumentException($"El Id del Archivo no puede estar vacío");
+
+            var listErrors = new List<string>();
+            var resultValidation = Helper.USR_ValidateRule4505(lineSeparator, columnSeparator, Parameters4505.CompanyId, Parameters4505.LibraryId, Parameters4505.FileId, ColumnLength, typeof(ENT_StructureRes4505En), listErrors);
+
+            if (listErrors.Count > 0)
+            {
+                //Lista retorno de archivo de errores
+                List<string> Listkey = new List<string>();
+                List<string> ListValue = new List<string>();
+                int conteo = 1;
+                foreach (var error in listErrors)
+                {
+                    string data = error;
+                    data = data.Replace("AAAA|MM|DD", "AAAA-MM-DD").Replace("1800|01|01", "1800-01-01");
+                    string[] lines = data.Split(Convert.ToChar(columnSeparator));
+                    if (lines.Length == 1)
+                    {
+                        Listkey.Add(string.Concat($"Error {conteo}"));
+                        ListValue.Add(string.Concat(lines[0].Trim(), $" verifique el archivo"));
+                        conteo++;
+                    }
+                    else if (lines.Length > 1 && lines.Length <= 3)
+                    {
+                        Listkey.Add(lines[0]);
+                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim()));
+                    }
+                    else
+                    {
+                        Listkey.Add(lines[0]);
+                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim(), columnSeparator, lines[3].Trim()));
+                    }
+                }
+
+                //Log de errores expresiones regulares
+                string pathFile = string.Empty;
+                if (ListValue.Count != 0)
+                    pathFile = Helper.USR_GenericSaveLog4505(new Dictionary<List<string>, List<string>>() { [Listkey] = ListValue }, folder);
+                else
+                    pathFile = Helper.USR_GenericSaveLog(new Dictionary<string, List<string>>() { ["4505"] = Listkey }, folder);
+
+
+                var attach = Helper.USR_WSAttachFileToProcess(pathFile, Parameters4505.UserCode, Parameters4505.CompanyId.ToString(), Parameters4505.CaseNumber, "4505");
+                if (attach.IsError)
+                {
+                    attach.ErrorMessage = "No se pudo asociar el archivo al proceso, ya que el archivo TXT no fue encontrado con los datos suministrados, favor verificar si se cargo en la plantilla de manera correcta.";
+                    return attach;
+                }
+                return new ENT_ActionResult() { FileName = attach.FileName, IsError = true, ErrorMessage = "Hubo errores en la validación " };
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultValidation.Result, FileName = resultValidation.FileName };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="dictionaryResult">dictionaryResult</param>
+        /// <param name="folder">folder</param>
+        public static string USR_GenericSaveLog4505(dynamic dictionaryResult, string folder)
+        {
+            try
+            {
+                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
+
+                if (!Directory.Exists(pathName))
+                    Directory.CreateDirectory(pathName);
+
+                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
+
+                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    sw.WriteLine("Fila;Mensaje");
+                    foreach (var file in dictionaryResult)
+                    {
+                        for (int i = 0; i < file.Value.Count; i++)
+                        {
+                            sw.WriteLine($"{file.Key[i]};{file.Value[i]}");
+                        }
+                        sw.Flush();
+                    }
+                }
+
+                return pathName;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Guarda log de un archivo 
+        /// </sumary> 
+        /// <param name="dictionaryResult">Dictionary con entidades a escribir en el log</param>
+        /// <param name="folder">carpeta donde se va a guardar el archivo</param>
+        public static string USR_GenericSaveLog(dynamic dictionaryResult, string folder)
+        {
+            try
+            {
+
+                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
+
+                if (!Directory.Exists(pathName))
+                    Directory.CreateDirectory(pathName);
+
+                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
+
+                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    sw.WriteLine("ARCHIVO;MENSAJE");
+                    foreach (var file in dictionaryResult)
+                    {
+                        for (int i = 0; i < file.Value.Count; i++)
+                        {
+                            sw.WriteLine($"{file.Key};{file.Value[i]}");
+                        }
+                        sw.Flush();
+                    }
+                }
+
+                return pathName;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene tipos de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        public static ENT_ActionResult USR_GetDocumentTypes(long adapterId)
+        {
+            var sql = new StringBuilder();
+            sql.Append(" SELECT Id, Code ");
+            sql.Append(" FROM TypeDetail WITH (NOLOCK)");
+            sql.Append(" WHERE IdTypeHead = 1");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="listErrors">Variable de parámetro de función vacía</param>
+        /// <param name="index">index</param>
+        /// <param name="listaQualification">listaQualification</param>
+        /// <param name="listOccupationCode">listOccupationCode</param>
+        /// <param name="ent">ent</param>
+        public static dynamic USR_FieldsValidate4505(List<string> listErrors, long index, List<dynamic> listaQualification, List<dynamic> listOccupationCode, ENT_StructureRes4505En ent)
+        {
+            //Codigos de habilitacion  => 
+            string pipe = "|";
+
+            //Valida codigo de habilitacion campo 2
+            if (!(ent.HabilitationCode.Equals("0") || ent.HabilitationCode.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 2"));
+
+            //Valida codigo HabilitationCodeCytology campo 90
+            if (!(ent.HabilitationCodeCytology.Equals("0") || ent.HabilitationCodeCytology.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeCytology) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 90"));
+
+            //Valida codigo HabilitationCodeCytology campo 92
+            if (!(ent.HabilitationCodeColposcopy.Equals("0") || ent.HabilitationCodeColposcopy.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeColposcopy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 92"));
+
+            //Valida codigo HabilitationCodeCytology campo 95
+            if (!(ent.HabilitationCodeBiopsy.Equals("0") || ent.HabilitationCodeBiopsy.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeBiopsy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 95"));
+
+            //Valida codigo HabilitationCodeCytology campo 98
+            if (!(ent.HabilitationCodeMammography.Equals("0") || ent.HabilitationCodeMammography.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeMammography) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 98"));
+
+            //Valida codigo de Ocupacion
+            if (!(ent.OccupationCode.Equals("9999") || ent.OccupationCode.Equals("9998")))
+                if (listOccupationCode.FirstOrDefault(x => x.Code == ent.OccupationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de Ocupacion en la BD o es invalido variable 12"));
+
+            //Valida WeightKg peso variable 30
+            if (!(ent.WeightKg.Equals("999")))
+            {
+                if (Convert.ToDouble(ent.WeightKg.Replace(".", ",")) < 0 || Convert.ToDouble(ent.WeightKg.Replace(".", ",")) > 249)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 30", $"{pipe}", "Peso en kilogramos", $"{pipe}", "El rango debe ser un numero menor a 250 o 999 max 1 decimal"));
+                }
+            }
+
+            //Valida hemoglobina variable 104
+            if (!(ent.ResultHemoglobin.Equals("0")))
+            {
+                if (Convert.ToDouble(ent.ResultHemoglobin.Replace(".",",")) < 1.5 || Convert.ToDouble(ent.ResultHemoglobin.Replace(".", ",")) > 20)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 104", $"{pipe}", "ResultadoHemoglobina", $"{pipe}", "El rango debe ser un numero decimal de 1.5 a 20 ó 0"));
+                }
+            }
+
+            //Valida hemoglobina variable 107
+            if (!ent.ResultCreatinine.Equals("999") && !ent.ResultCreatinine.Equals("0")) /// validar poner operador
+			{
+                if (Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) < 0.2 || Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) > 25)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 107", $"{pipe}", "Resultado Creatinina", $"{pipe}", "El rango debe ser un numero decimal de 0.2 a 25 o tener el valor de 0 ó 999"));
+                }
+            }
+
+            //Valida hemoglobina variable 109
+            if (!ent.ResultGlycosylatedHemoglobin.Equals("999") && !ent.ResultGlycosylatedHemoglobin.Equals("0")) //validar poner operador
+            {
+                if (Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")) < 5 || Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")) > 20)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 109", $"{pipe}", "Hemoglobina Glicosilada", $"{pipe}", "El rango debe ser un numero decimal de 5 a 20 o tener el valor de 0 ó 999"));
+                }
+            }
+
+            return true;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Prototipo de verificación
+        /// </sumary> 
+        /// <param name="rules">Reglas a evaluar</param>
+        public static object SYS_VerificationPrototype(object rules)
+        {
+            IEnumerable<Func<object>> funcs = ((IEnumerable<Func<object>>)rules);
+
+            string messages = string.Empty;
+            bool result = true;
+            foreach (Func<object> rul in funcs)
+            {
+                var r = rul();
+                if (!r.GetPropertyValue<bool>("IsValid"))
+                {
+                    result = false;
+                    messages += "* " + r.GetPropertyValue<string>("Message") + "\n\r";
+                }
+            }
+
+            return new { Result = result, Messages = messages };
+        }
+
 
         #region Extention
         /// <sumary>
@@ -23651,6 +23841,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         }
         #endregion
     }
+
 
     /// <summary>
     /// Encapsula el resultado de la petición
@@ -23753,715 +23944,715 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _TypeRegister;
         [Order]
-        [Regex(@"^([2]){1}$", "Variable 0 - Tipo de Registro -  Solo acepta el numero 2")] public string TypeRegister { get { return _TypeRegister; } set { _TypeRegister = ValidateValue<string>(value, nameof(TypeRegister)); } }
+        [Regex(@"^([2]){1}$", "Variable 0 - Tipo de Registro -  Solo acepta el numero 2.Sin caracteres especiales ni espacios")] public string TypeRegister { get { return _TypeRegister; } set { _TypeRegister = ValidateValue<string>(value, nameof(TypeRegister)); } }
         /// <sumary>
         /// IdRegister
         /// </sumary>
         private string _IdRegister;
         [Order]
-        [Regex(@"^([0-9]){1,20}$", "Variable 1 - Consecutivo de Registro -  La longitud válida son 1 a 20 caracteres numéricos")] public string IdRegister { get { return _IdRegister; } set { _IdRegister = ValidateValue<string>(value, nameof(IdRegister)); } }
+        [Regex(@"^([0-9]){1,20}$", "Variable 1 - Consecutivo de Registro -  La longitud valida son 1 a 20 caracteres numericos.Sin caracteres especiales ni espacios")] public string IdRegister { get { return _IdRegister; } set { _IdRegister = ValidateValue<string>(value, nameof(IdRegister)); } }
         /// <sumary>
         /// HabilitationCode
         /// </sumary>
         private string _HabilitationCode;
         [Order]
-        [Regex(@"^[0-9]{12}$|^(999)$", "Variable 2 - Codigo de Habilitacion -  Solo acepta el 999 como comodin o el numero de habilitacion de 12 caracteres ")] public string HabilitationCode { get { return _HabilitationCode; } set { _HabilitationCode = ValidateValue<string>(value, nameof(HabilitationCode)); } }
+        [Regex(@"^[0-9]{12}$|^(999)$", "Variable 2 - Codigo de Habilitacion -  Solo acepta el 999 como comodin o el numero de habilitacion de 12 caracteres.Sin caracteres especiales ni espacios")] public string HabilitationCode { get { return _HabilitationCode; } set { _HabilitationCode = ValidateValue<string>(value, nameof(HabilitationCode)); } }
         /// <sumary>
         /// IdentificationType
         /// </sumary>
         private string _IdentificationType;
         [Order]
-        [Regex(@"^(TI|CC|CE|PA|RC|UN|NV|MS|AS)$", "Variable 3 - Tipo Identificacion -Solo permite mayusculas longitud de 2 carácteres (TI,CC,CE,PA,RC,UN,NV,MS,AS)")] [Length(2)] public string IdentificationType { get { return _IdentificationType; } set { _IdentificationType = ValidateValue<string>(value, nameof(IdentificationType)); } }
+        [Regex(@"^(TI|CC|CE|PA|RC|UN|NV|MS|AS)$", "Variable 3 - Tipo Identificacion -Solo permite mayusculas longitud de 2 caracteres (TI,CC,CE,PA,RC,UN,NV,MS,AS).Sin caracteres especiales ni espacios")] [Length(2)] public string IdentificationType { get { return _IdentificationType; } set { _IdentificationType = ValidateValue<string>(value, nameof(IdentificationType)); } }
         /// <sumary>
         /// DocumentNumber
         /// </sumary>
         private string _DocumentNumber;
         [Order]
-        [Regex(@"^[A-Za-z0-9_-]{1,20}$", "Variable 4 - NumeroDocumento -  Solo permite longitud de 1 a 20 carácteres")] [Length(18)] public string DocumentNumber { get { return _DocumentNumber; } set { _DocumentNumber = ValidateValue<string>(value, nameof(DocumentNumber)); } }
+        [Regex(@"^[A-Za-z0-9]{1,18}$", "Variable 4 - NumeroDocumento -  Solo permite longitud de 1 a 18 caracteres.Sin caracteres especiales ni espacios")] [Length(18)] public string DocumentNumber { get { return _DocumentNumber; } set { _DocumentNumber = ValidateValue<string>(value, nameof(DocumentNumber)); } }
         /// <sumary>
         /// FirstLastName
         /// </sumary>
         private string _FirstLastName;
         [Order]
-        [Regex(@"^([A-Z ]){1,30}$", "Variable 5 - Primer Apellido -  Solo permite letras mayusculas con longitud de 1 a 30 carácteres")] public string FirstLastName { get { return _FirstLastName; } set { _FirstLastName = ValidateValue<string>(value, nameof(FirstLastName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 5 - Primer Apellido -  Solo permite letras mayusculas con longitud de 1 a 30 caracteres.Sin caracteres especiales ni espacios")] public string FirstLastName { get { return _FirstLastName; } set { _FirstLastName = ValidateValue<string>(value, nameof(FirstLastName)); } }
         /// <sumary>
         /// SecondLastName
         /// </sumary>
         private string _SecondLastName;
         [Order]
-        [Regex(@"^[A-Z ]{1,30}$", "Variable 6 - SegundoApellido -Solo permite longitud de 1 a 30 carácteres ó la palabra NONE en mayuscula")] public string SecondLastName { get { return _SecondLastName; } set { _SecondLastName = ValidateValue<string>(value, nameof(SecondLastName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 6 - SegundoApellido -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondLastName { get { return _SecondLastName; } set { _SecondLastName = ValidateValue<string>(value, nameof(SecondLastName)); } }
         /// <sumary>
         /// FirstName
         /// </sumary>
         private string _FirstName;
         [Order]
-        [Regex(@"^([A-Z ]){1,30}$", "Variable 7 - Primer Nombre -  Solo permite letras mayúsculas con longitud de 1 A 30 carácteres")] public string FirstName { get { return _FirstName; } set { _FirstName = ValidateValue<string>(value, nameof(FirstName)); } }
+        [Regex(@"^([A-Z]){1,30}$", "Variable 7 - Primer Nombre -  Solo permite letras mayusculas con longitud de 1 A 30 caracteres.Sin caracteres especiales ni espacios")] public string FirstName { get { return _FirstName; } set { _FirstName = ValidateValue<string>(value, nameof(FirstName)); } }
         /// <sumary>
         /// SecondName
         /// </sumary>
         private string _SecondName;
         [Order]
-        [Regex(@"^[A-Z ]{1,30}$", "Variable 8 - SegundoNombre -Solo permite longitud de 1 a 30 carácteres ó la palabra NONE en mayuscula")] public string SecondName { get { return _SecondName; } set { _SecondName = ValidateValue<string>(value, nameof(SecondName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 8 - SegundoNombre -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondName { get { return _SecondName; } set { _SecondName = ValidateValue<string>(value, nameof(SecondName)); } }
         /// <sumary>
         /// BirthDate
         /// </sumary>
         private string _BirthDate;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 9 - Fecha de Nacimiento -  Solo permite longitud de 10 carácteres AAAA-MM-DD")] public string BirthDate { get { return _BirthDate; } set { _BirthDate = ValidateValue<string>(value, nameof(BirthDate)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 9 - Fecha de Nacimiento -  Solo permite longitud de 10 caracteres AAAA-MM-DD.Sin caracteres especiales ni espacios")] public string BirthDate { get { return _BirthDate; } set { _BirthDate = ValidateValue<string>(value, nameof(BirthDate)); } }
         /// <sumary>
         /// IdSex
         /// </sumary>
         private string _IdSex;
         [Order]
-        [Regex(@"^(M|F)$", "Variable 10 - Sexo -  Solo acepta mayuscula con longitud max 1 caracter (M ó F) Masculino ó Femenino")] public string IdSex { get { return _IdSex; } set { _IdSex = ValidateValue<string>(value, nameof(IdSex)); } }
+        [Regex(@"^(M|F)$", "Variable 10 - Sexo -  Solo acepta mayuscula con longitud max 1 caracter (M o F) Masculino o Femenino.Sin caracteres especiales ni espacios")] public string IdSex { get { return _IdSex; } set { _IdSex = ValidateValue<string>(value, nameof(IdSex)); } }
         /// <sumary>
         /// CodeEthnic
         /// </sumary>
         private string _CodeEthnic;
         [Order]
-        [Regex(@"^[1-6]{1}$", "Variable 11 - Codigo de Pertenencia Etnica -  Solo acepta los valores (1,2,3,4,5,6)")] public string CodeEthnic { get { return _CodeEthnic; } set { _CodeEthnic = ValidateValue<string>(value, nameof(CodeEthnic)); } }
+        [Regex(@"^[1-6]{1}$", "Variable 11 - Codigo de Pertenencia Etnica -  Solo acepta los valores (1,2,3,4,5,6).Sin caracteres especiales ni espacios")] public string CodeEthnic { get { return _CodeEthnic; } set { _CodeEthnic = ValidateValue<string>(value, nameof(CodeEthnic)); } }
         /// <sumary>
         /// OccupationCode
         /// </sumary>
         private string _OccupationCode;
         [Order]
-        [Regex(@"^[0-9]{4}$|^(9999|9998)$", "Variable 12 - Codigo de Ocupacion -  Solo acepta como minimo un numero de 4 digitos o (9998|9999)")] public string OccupationCode { get { return _OccupationCode; } set { _OccupationCode = ValidateValue<string>(value, nameof(OccupationCode)); } }
+        [Regex(@"^[0-9]{4}$|^(9999|9998)$", "Variable 12 - Codigo de Ocupacion -  Solo acepta como minimo un numero de 4 digitos.Sin caracteres especiales ni espacios")] public string OccupationCode { get { return _OccupationCode; } set { _OccupationCode = ValidateValue<string>(value, nameof(OccupationCode)); } }
         /// <sumary>
         /// CodeEducaLevel
         /// </sumary>
         private string _CodeEducaLevel;
         [Order]
-        [Regex(@"^([1-9]|1[0-3])$", "Variable 13 - Codigo de Nivel Educativo -  Solo acepta los numeros (1,2,3,4,5,6,7,8,9,10,11,12,13)")] public string CodeEducaLevel { get { return _CodeEducaLevel; } set { _CodeEducaLevel = ValidateValue<string>(value, nameof(CodeEducaLevel)); } }
+        [Regex(@"^([1-9]|1[0-3])$", "Variable 13 - Codigo de Nivel Educativo -  Solo acepta los numeros (1,2,3,4,5,6,7,8,9,10,11,12,13).Sin caracteres especiales ni espacios")] public string CodeEducaLevel { get { return _CodeEducaLevel; } set { _CodeEducaLevel = ValidateValue<string>(value, nameof(CodeEducaLevel)); } }
         /// <sumary>
         /// Gestation
         /// </sumary>
         private string _Gestation;
         [Order]
-        [Regex(@"^[0-3]{1}$|(21)$", "Variable 14 - Gestacion -  Solo acepta numeros (0,1,2,3) o (21)")] public string Gestation { get { return _Gestation; } set { _Gestation = ValidateValue<string>(value, nameof(Gestation)); } }
+        [Regex(@"^[0-2]{1}$|(21)$", "Variable 14 - Gestacion -  Solo acepta numeros (0,1,2) o (21)Sin caracteres especiales ni espacios")] public string Gestation { get { return _Gestation; } set { _Gestation = ValidateValue<string>(value, nameof(Gestation)); } }
         /// <sumary>
         /// GestaCongeSyphilis
         /// </sumary>
         private string _GestaCongeSyphilis;
         [Order]
-        [Regex(@"^[0-3]{1}$|(21)$", "Variable 15 - Sifilis Gestacional Congenita -  Solo acepta numeros (0,1,2,3) o (21)")] public string GestaCongeSyphilis { get { return _GestaCongeSyphilis; } set { _GestaCongeSyphilis = ValidateValue<string>(value, nameof(GestaCongeSyphilis)); } }
+        [Regex(@"^[0-3]{1}$|(21)$", "Variable 15 - Sifilis Gestacional Congenita -  Solo acepta numeros (0,1,2,3) o (21).Sin caracteres especiales ni espacios")] public string GestaCongeSyphilis { get { return _GestaCongeSyphilis; } set { _GestaCongeSyphilis = ValidateValue<string>(value, nameof(GestaCongeSyphilis)); } }
         /// <sumary>
         /// HypertenInducPreg
         /// </sumary>
         private string _HypertenInducPreg;
         [Order]
-        [Regex(@"^[0-2]{1}$|(21)$", "Variable 16 - Hipertencion Inducida -  Solo acepta numeros (0,1,2) o (21)")] public string HypertenInducPreg { get { return _HypertenInducPreg; } set { _HypertenInducPreg = ValidateValue<string>(value, nameof(HypertenInducPreg)); } }
+        [Regex(@"^[0-2]{1}$|(21)$", "Variable 16 - Hipertencion Inducida -  Solo acepta numeros (0,1,2) o (21).Sin caracteres especiales ni espacios")] public string HypertenInducPreg { get { return _HypertenInducPreg; } set { _HypertenInducPreg = ValidateValue<string>(value, nameof(HypertenInducPreg)); } }
         /// <sumary>
         /// CongeHypothyroidism
         /// </sumary>
         private string _CongeHypothyroidism;
         [Order]
-        [Regex(@"^[0-2]{1}$|(21)$", "Variable 17 - Hipotiroidismo Congenito -  Solo acepta numeros (0,1,2) o (21)")] public string CongeHypothyroidism { get { return _CongeHypothyroidism; } set { _CongeHypothyroidism = ValidateValue<string>(value, nameof(CongeHypothyroidism)); } }
+        [Regex(@"^[0-2]{1}$|(21)$", "Variable 17 - Hipotiroidismo Congenito -  Solo acepta numeros (0,1,2) o (21)).Sin caracteres especiales ni espacios")] public string CongeHypothyroidism { get { return _CongeHypothyroidism; } set { _CongeHypothyroidism = ValidateValue<string>(value, nameof(CongeHypothyroidism)); } }
         /// <sumary>
         /// SymptRespiratory
         /// </sumary>
         private string _SymptRespiratory;
         [Order]
-        [Regex(@"^[1-2]{1}$|(21)$", "Variable 18 - Sintomatico Respiratorio -  Solo acepta numeros (1,2) o (21)")] public string SymptRespiratory { get { return _SymptRespiratory; } set { _SymptRespiratory = ValidateValue<string>(value, nameof(SymptRespiratory)); } }
+        [Regex(@"^[1-2]{1}$|(21)$", "Variable 18 - Sintomatico Respiratorio -  Solo acepta numeros (1,2) o (21)).Sin caracteres especiales ni espacios")] public string SymptRespiratory { get { return _SymptRespiratory; } set { _SymptRespiratory = ValidateValue<string>(value, nameof(SymptRespiratory)); } }
         /// <sumary>
         /// MultiDrugResisTuber
         /// </sumary>
         private string _MultiDrugResisTuber;
         [Order]
-        [Regex(@"^[0-2]{1}$|(21)$", "Variable 19 - Tuberculosis Multidrogo resistente -  Solo acepta numeros (0,1,2) o (21)")] public string MultiDrugResisTuber { get { return _MultiDrugResisTuber; } set { _MultiDrugResisTuber = ValidateValue<string>(value, nameof(MultiDrugResisTuber)); } }
+        [Regex(@"^[0-2]{1}$|(21)$", "Variable 19 - Tuberculosis Multidrogo resistente -  Solo acepta numeros (0,1,2) o (21).Sin caracteres especiales ni espacios")] public string MultiDrugResisTuber { get { return _MultiDrugResisTuber; } set { _MultiDrugResisTuber = ValidateValue<string>(value, nameof(MultiDrugResisTuber)); } }
         /// <sumary>
         /// Leprosy
         /// </sumary>
         private string _Leprosy;
         [Order]
-        [Regex(@"^[1-3]{1}$|(21)$", "Variable 20 - Lepra -  Solo acepta numeros (1,2,3) o (21)")] public string Leprosy { get { return _Leprosy; } set { _Leprosy = ValidateValue<string>(value, nameof(Leprosy)); } }
+        [Regex(@"^[1-3]{1}$|(21)$", "Variable 20 - Lepra -  Solo acepta numeros (1,2,3) o (21).Sin caracteres especiales ni espacios")] public string Leprosy { get { return _Leprosy; } set { _Leprosy = ValidateValue<string>(value, nameof(Leprosy)); } }
         /// <sumary>
         /// ObesCaloProtMalnut
         /// </sumary>
         private string _ObesCaloProtMalnut;
         [Order]
-        [Regex(@"^[1-3]{1}$|(21)$", "Variable 21 - Obesidad Proteico Calorica -  Solo acepta numeros (1,2,3) o (21)")] public string ObesCaloProtMalnut { get { return _ObesCaloProtMalnut; } set { _ObesCaloProtMalnut = ValidateValue<string>(value, nameof(ObesCaloProtMalnut)); } }
+        [Regex(@"^[1-3]{1}$|(21)$", "Variable 21 - Obesidad Proteico Calorica -  Solo acepta numeros (1,2,3) o (21).Sin caracteres especiales ni espacios")] public string ObesCaloProtMalnut { get { return _ObesCaloProtMalnut; } set { _ObesCaloProtMalnut = ValidateValue<string>(value, nameof(ObesCaloProtMalnut)); } }
         /// <sumary>
         /// AbuseVictim
         /// </sumary>
         private string _AbuseVictim;
         [Order]
-        [Regex(@"^[0-3]{1}$|(21)$", "Variable 22 - Victima Maltrado -  Solo acepta numeros (0,1,2,3) o (21)")] public string AbuseVictim { get { return _AbuseVictim; } set { _AbuseVictim = ValidateValue<string>(value, nameof(AbuseVictim)); } }
+        [Regex(@"^[0-3]{1}$|(21)$", "Variable 22 - Victima Maltrado -  Solo acepta numeros (0,1,2,3) o (21).Sin caracteres especiales ni espacios")] public string AbuseVictim { get { return _AbuseVictim; } set { _AbuseVictim = ValidateValue<string>(value, nameof(AbuseVictim)); } }
         /// <sumary>
         /// VictimSexViolence
         /// </sumary>
         private string _VictimSexViolence;
         [Order]
-        [Regex(@"^[1-2]{1}$|(21)$", "Variable 23 - Victima Violencia Sexual -  Solo acepta numeros (1,2) o (21)")] public string VictimSexViolence { get { return _VictimSexViolence; } set { _VictimSexViolence = ValidateValue<string>(value, nameof(VictimSexViolence)); } }
+        [Regex(@"^[1-2]{1}$|(21)$", "Variable 23 - Victima Violencia Sexual -  Solo acepta numeros (1,2) o (21).Sin caracteres especiales ni espacios")] public string VictimSexViolence { get { return _VictimSexViolence; } set { _VictimSexViolence = ValidateValue<string>(value, nameof(VictimSexViolence)); } }
         /// <sumary>
         /// SexTransInfect
         /// </sumary>
         private string _SexTransInfect;
         [Order]
-        [Regex(@"^[1-2]{1}$|(21)$", "Variable 24 - Infeccion de Trasmision Sexual -  Solo acepta numeros (1,2) o (21)")] public string SexTransInfect { get { return _SexTransInfect; } set { _SexTransInfect = ValidateValue<string>(value, nameof(SexTransInfect)); } }
+        [Regex(@"^[1-2]{1}$|(21)$", "Variable 24 - Infeccion de Trasmision Sexual -  Solo acepta numeros (1,2) o (21).Sin caracteres especiales ni espacios")] public string SexTransInfect { get { return _SexTransInfect; } set { _SexTransInfect = ValidateValue<string>(value, nameof(SexTransInfect)); } }
         /// <sumary>
         /// DiagMentalIllness
         /// </sumary>
         private string _DiagMentalIllness;
         [Order]
-        [Regex(@"^[1-7]{1}$|(21)$", "Variable 25 - Enfermedad Mental -  Solo acepta los valores (1,2,3,4,5,6,7) o (21)")] public string DiagMentalIllness { get { return _DiagMentalIllness; } set { _DiagMentalIllness = ValidateValue<string>(value, nameof(DiagMentalIllness)); } }
+        [Regex(@"^[1-7]{1}$|(21)$", "Variable 25 - Enfermedad Mental -  Solo acepta los valores (1,2,3,4,5,6,7) o (21).Sin caracteres especiales ni espacios")] public string DiagMentalIllness { get { return _DiagMentalIllness; } set { _DiagMentalIllness = ValidateValue<string>(value, nameof(DiagMentalIllness)); } }
         /// <sumary>
         /// CervixCancer
         /// </sumary>
         private string _CervixCancer;
         [Order]
-        [Regex(@"^[0-2]{1}$|(21)$", "Variable 26 - Cancer Cervix -  Solo acepta numeros (0,1,2) o (21)")] public string CervixCancer { get { return _CervixCancer; } set { _CervixCancer = ValidateValue<string>(value, nameof(CervixCancer)); } }
+        [Regex(@"^[0-2]{1}$|(21)$", "Variable 26 - Cancer Cervix -  Solo acepta numeros (0,1,2) o (21).Sin caracteres especiales ni espacios")] public string CervixCancer { get { return _CervixCancer; } set { _CervixCancer = ValidateValue<string>(value, nameof(CervixCancer)); } }
         /// <sumary>
         /// BreastCancer
         /// </sumary>
         private string _BreastCancer;
         [Order]
-        [Regex(@"^[1-2]{1}$|(21)$", "Variable 27 - Cancer Seno -  Solo acepta numeros (1,2) o (21)")] public string BreastCancer { get { return _BreastCancer; } set { _BreastCancer = ValidateValue<string>(value, nameof(BreastCancer)); } }
+        [Regex(@"^[1-2]{1}$|(21)$", "Variable 27 - Cancer Seno -  Solo acepta numeros (1,2) o (21).Sin caracteres especiales ni espacios")] public string BreastCancer { get { return _BreastCancer; } set { _BreastCancer = ValidateValue<string>(value, nameof(BreastCancer)); } }
         /// <sumary>
         /// DentalFluorosis
         /// </sumary>
         private string _DentalFluorosis;
         [Order]
-        [Regex(@"^[1-2]{1}$|(21)$", "Variable 28 - Fluorosis Dental -  Solo acepta numeros (1,2) o (21)")] public string DentalFluorosis { get { return _DentalFluorosis; } set { _DentalFluorosis = ValidateValue<string>(value, nameof(DentalFluorosis)); } }
+        [Regex(@"^[1-2]{1}$|(21)$", "Variable 28 - Fluorosis Dental -  Solo acepta numeros (1,2) o (21).Sin caracteres especiales ni espacios")] public string DentalFluorosis { get { return _DentalFluorosis; } set { _DentalFluorosis = ValidateValue<string>(value, nameof(DentalFluorosis)); } }
         /// <sumary>
         /// DateWeight
         /// </sumary>
         private string _DateWeight;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 29 - Fecha de Peso -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateWeight { get { return _DateWeight; } set { _DateWeight = ValidateValue<string>(value, nameof(DateWeight)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 29 - Fecha de Peso -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateWeight { get { return _DateWeight; } set { _DateWeight = ValidateValue<string>(value, nameof(DateWeight)); } }
         /// <sumary>
         /// WeightKg
         /// </sumary>
         private string _WeightKg;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 30 - PesoKg - Solo acepta un numero con una longitud max 5 carcteres si no se toma ingrese 999. Si es un dato decimal solo acepta punto como separador y un solo valor decimal")] public string WeightKg { get { return _WeightKg; } set { _WeightKg = ValidateValue<string>(value, nameof(WeightKg)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 30 - PesoKg - Solo acepta un numero con una longitud max 5 carcteres si no se toma ingrese 999. Si es un dato decimal solo acepta punto como separador y un solo valor decimal).Sin caracteres especiales ni espacios")] public string WeightKg { get { return _WeightKg; } set { _WeightKg = ValidateValue<string>(value, nameof(WeightKg)); } }
         /// <sumary>
         /// DateHeight
         /// </sumary>
         private string _DateHeight;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 31 - Fecha de Talla -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateHeight { get { return _DateHeight; } set { _DateHeight = ValidateValue<string>(value, nameof(DateHeight)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 31 - Fecha de Talla -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateHeight { get { return _DateHeight; } set { _DateHeight = ValidateValue<string>(value, nameof(DateHeight)); } }
         /// <sumary>
         /// HeightCm
         /// </sumary>
         private string _HeightCm;
         [Order]
-        [Regex(@"^[0-9]{1,4}$", "Variable 32 - Talla en Centimetros -  Solo permite longitud de 4 carácteres numerico")] public string HeightCm { get { return _HeightCm; } set { _HeightCm = ValidateValue<string>(value, nameof(HeightCm)); } }
+        [Regex(@"^0*(?:[1-9][0-9]?|100)$|^(00[1-9]|0[1-9][0-9]|1[0-9][0-9]|200)$|^(201|202|203|204|205|206|207|208|209|210|211|212|213|214|215|216|217|218|219|220|221|222|223|224|999)$", "Variable 32 - Talla en Centimetros -  Solo permite longitud de 3 caracteres numerico.Sin caracteres especiales ni espacios")] public string HeightCm { get { return _HeightCm; } set { _HeightCm = ValidateValue<string>(value, nameof(HeightCm)); } }
         /// <sumary>
         /// DateEstimPartitium
         /// </sumary>
         private string _DateEstimPartitium;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 33 - Fecha Probable de Parto -  Solo permite longitud de 10 carácteres AAAA-MM-DD")] public string DateEstimPartitium { get { return _DateEstimPartitium; } set { _DateEstimPartitium = ValidateValue<string>(value, nameof(DateEstimPartitium)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 33 - Fecha Probable de Parto -  Solo permite longitud de 10 caracteres AAAA-MM-DD.Sin caracteres especiales ni espacios")] public string DateEstimPartitium { get { return _DateEstimPartitium; } set { _DateEstimPartitium = ValidateValue<string>(value, nameof(DateEstimPartitium)); } }
         /// <sumary>
         /// GestaAgeBorn
         /// </sumary>
         private string _GestaAgeBorn;
         [Order]
-        [Regex(@"^[0-9]{1,3}$", "Variable 34 - Edad Gestacional -  Se registra el dato de la edad gestacion en semanas si no tiene registrar 999 si no aplica registrar 0")] public string GestaAgeBorn { get { return _GestaAgeBorn; } set { _GestaAgeBorn = ValidateValue<string>(value, nameof(GestaAgeBorn)); } }
+        [Regex(@"^([01]?\d|20)$|^([02]?\d|30)$|^([03]?\d|40)$|^(41|42|43|999)$", "Variable 34 - Edad Gestacional -  Se registra el dato de la edad gestacion en semanas con una longitud de 2 caracteres. si no tiene registrar 999.Sin caracteres especiales ni espacios")] public string GestaAgeBorn { get { return _GestaAgeBorn; } set { _GestaAgeBorn = ValidateValue<string>(value, nameof(GestaAgeBorn)); } }
         /// <sumary>
         /// BCG
         /// </sumary>
         private string _BCG;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 35 - BCG -  Solo acepta los valores (0,1,16,17,18,19,20,22)")] public string BCG { get { return _BCG; } set { _BCG = ValidateValue<string>(value, nameof(BCG)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 35 - BCG -  Solo acepta los valores (0,1,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string BCG { get { return _BCG; } set { _BCG = ValidateValue<string>(value, nameof(BCG)); } }
         /// <sumary>
         /// HepatBUnderOneYear
         /// </sumary>
         private string _HepatBUnderOneYear;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 36 - Hepatitis B Menores de 1 Año -  Solo acepta los valores (0,1,16,17,18,19,20,22)")] public string HepatBUnderOneYear { get { return _HepatBUnderOneYear; } set { _HepatBUnderOneYear = ValidateValue<string>(value, nameof(HepatBUnderOneYear)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 36 - Hepatitis B Menores de 1 A�o -  Solo acepta los valores (0,1,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string HepatBUnderOneYear { get { return _HepatBUnderOneYear; } set { _HepatBUnderOneYear = ValidateValue<string>(value, nameof(HepatBUnderOneYear)); } }
         /// <sumary>
         /// Pentavalent
         /// </sumary>
         private string _Pentavalent;
         [Order]
-        [Regex(@"^[0-9]{1,2}$", "Variable 37 - Pentavalente -  Solo permite longitud de 1 a 2 caracteres numericos")] public string Pentavalent { get { return _Pentavalent; } set { _Pentavalent = ValidateValue<string>(value, nameof(Pentavalent)); } }
+        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 37 - Pentavalente -  Solo permite longitud de 1 a 2 caracteres numericos.Sin caracteres especiales ni espacios")] public string Pentavalent { get { return _Pentavalent; } set { _Pentavalent = ValidateValue<string>(value, nameof(Pentavalent)); } }
         /// <sumary>
         /// Polio
         /// </sumary>
         private string _Polio;
         [Order]
-        [Regex(@"^[0-5]{1}$|^(16|17|18|19|20|22)$", "Variable 38 - Polio -  Solo acepta los valores (0,1,2,3,4,5,16,17,18,19,20,22)")] public string Polio { get { return _Polio; } set { _Polio = ValidateValue<string>(value, nameof(Polio)); } }
+        [Regex(@"^[0-5]{1}$|^(16|17|18|19|20|22)$", "Variable 38 - Polio -  Solo acepta los valores (0,1,2,3,4,5,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string Polio { get { return _Polio; } set { _Polio = ValidateValue<string>(value, nameof(Polio)); } }
         /// <sumary>
         /// DPTUnderFiveYears
         /// </sumary>
         private string _DPTUnderFiveYears;
         [Order]
-        [Regex(@"^[0]{1}$|^(4|5|16|17|18|19|20|22)$", "Variable 39 - DPT Menores de 5 Años -  Solo acepta los valores (0,4,5,16,17,18,19,20,22)")] public string DPTUnderFiveYears { get { return _DPTUnderFiveYears; } set { _DPTUnderFiveYears = ValidateValue<string>(value, nameof(DPTUnderFiveYears)); } }
+        [Regex(@"^[0]{1}$|^(4|5|16|17|18|19|20|22)$", "Variable 39 - DPT Menores de 5 A�os -  Solo acepta los valores (0,4,5,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string DPTUnderFiveYears { get { return _DPTUnderFiveYears; } set { _DPTUnderFiveYears = ValidateValue<string>(value, nameof(DPTUnderFiveYears)); } }
         /// <sumary>
         /// Rotavirus
         /// </sumary>
         private string _Rotavirus;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 40 - Rotavirus -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string Rotavirus { get { return _Rotavirus; } set { _Rotavirus = ValidateValue<string>(value, nameof(Rotavirus)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 40 - Rotavirus -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string Rotavirus { get { return _Rotavirus; } set { _Rotavirus = ValidateValue<string>(value, nameof(Rotavirus)); } }
         /// <sumary>
         /// Pneumococcus
         /// </sumary>
         private string _Pneumococcus;
         [Order]
-        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 41 - Neumococo -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22)")] public string Pneumococcus { get { return _Pneumococcus; } set { _Pneumococcus = ValidateValue<string>(value, nameof(Pneumococcus)); } }
+        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 41 - Neumococo -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22)).Sin caracteres especiales ni espacios")] public string Pneumococcus { get { return _Pneumococcus; } set { _Pneumococcus = ValidateValue<string>(value, nameof(Pneumococcus)); } }
         /// <sumary>
         /// InfluenzaChildren
         /// </sumary>
         private string _InfluenzaChildren;
         [Order]
-        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 42 - Influenza en Niños -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22)")] public string InfluenzaChildren { get { return _InfluenzaChildren; } set { _InfluenzaChildren = ValidateValue<string>(value, nameof(InfluenzaChildren)); } }
+        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 42 - Influenza en Ni�os -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string InfluenzaChildren { get { return _InfluenzaChildren; } set { _InfluenzaChildren = ValidateValue<string>(value, nameof(InfluenzaChildren)); } }
         /// <sumary>
         /// YellowFeverOneY
         /// </sumary>
         private string _YellowFeverOneY;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 43 - Fiebre Amarilla en Niños de 1 Año -  Solo acepta los valores (0,1,16,17,18,19,20,22)")] public string YellowFeverOneY { get { return _YellowFeverOneY; } set { _YellowFeverOneY = ValidateValue<string>(value, nameof(YellowFeverOneY)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 43 - Fiebre Amarilla en Ni�os de 1 A�o -  Solo acepta los valores (0,1,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string YellowFeverOneY { get { return _YellowFeverOneY; } set { _YellowFeverOneY = ValidateValue<string>(value, nameof(YellowFeverOneY)); } }
         /// <sumary>
         /// HepatitisA
         /// </sumary>
         private string _HepatitisA;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 44 - HepatitisA -  Solo acepta los valores (0,1,16,17,18,19,20,22)")] public string HepatitisA { get { return _HepatitisA; } set { _HepatitisA = ValidateValue<string>(value, nameof(HepatitisA)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|22)$", "Variable 44 - HepatitisA -  Solo acepta los valores (0,1,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string HepatitisA { get { return _HepatitisA; } set { _HepatitisA = ValidateValue<string>(value, nameof(HepatitisA)); } }
         /// <sumary>
         /// TriViralChild
         /// </sumary>
         private string _TriViralChild;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 45 - Triple Viral Niños -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string TriViralChild { get { return _TriViralChild; } set { _TriViralChild = ValidateValue<string>(value, nameof(TriViralChild)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 45 - Triple Viral Ni�os -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TriViralChild { get { return _TriViralChild; } set { _TriViralChild = ValidateValue<string>(value, nameof(TriViralChild)); } }
         /// <sumary>
         /// VPH
         /// </sumary>
         private string _VPH;
         [Order]
-        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 46 - VPH -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22)")] public string VPH { get { return _VPH; } set { _VPH = ValidateValue<string>(value, nameof(VPH)); } }
+        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 46 - VPH -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string VPH { get { return _VPH; } set { _VPH = ValidateValue<string>(value, nameof(VPH)); } }
         /// <sumary>
         /// TDorTTWomFertAge
         /// </sumary>
         private string _TDorTTWomFertAge;
         [Order]
-        [Regex(@"^[0-5]{1}$|^(16|17|18|19|20|22)$", "Variable 47 - TD O TT Mujeres Edad Fertil 15 A 49 Años -  Solo acepta los valores (0,1,2,3,4,5,16,17,18,19,20,22)")] public string TDorTTWomFertAge { get { return _TDorTTWomFertAge; } set { _TDorTTWomFertAge = ValidateValue<string>(value, nameof(TDorTTWomFertAge)); } }
+        [Regex(@"^[0-5]{1}$|^(16|17|18|19|20|22)$", "Variable 47 - TD O TT Mujeres Edad Fertil 15 A 49 A�os -  Solo acepta los valores (0,1,2,3,4,5,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TDorTTWomFertAge { get { return _TDorTTWomFertAge; } set { _TDorTTWomFertAge = ValidateValue<string>(value, nameof(TDorTTWomFertAge)); } }
         /// <sumary>
         /// BactPlateCtrl
         /// </sumary>
         private string _BactPlateCtrl;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 48 - Control Placa Bacteriana -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string BactPlateCtrl { get { return _BactPlateCtrl; } set { _BactPlateCtrl = ValidateValue<string>(value, nameof(BactPlateCtrl)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 48 - Control Placa Bacteriana -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string BactPlateCtrl { get { return _BactPlateCtrl; } set { _BactPlateCtrl = ValidateValue<string>(value, nameof(BactPlateCtrl)); } }
         /// <sumary>
         /// DateAttenPartiCesar
         /// </sumary>
         private string _DateAttenPartiCesar;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 49 - Fecha de Atencion Parto Cesaria -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateAttenPartiCesar { get { return _DateAttenPartiCesar; } set { _DateAttenPartiCesar = ValidateValue<string>(value, nameof(DateAttenPartiCesar)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 49 - Fecha de Atencion Parto Cesaria -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateAttenPartiCesar { get { return _DateAttenPartiCesar; } set { _DateAttenPartiCesar = ValidateValue<string>(value, nameof(DateAttenPartiCesar)); } }
         /// <sumary>
         /// ExitDateAttenPartiCesar
         /// </sumary>
         private string _ExitDateAttenPartiCesar;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 50 - Salida de Atencion Parto Cesaria -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string ExitDateAttenPartiCesar { get { return _ExitDateAttenPartiCesar; } set { _ExitDateAttenPartiCesar = ValidateValue<string>(value, nameof(ExitDateAttenPartiCesar)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 50 - Salida de Atencion Parto Cesaria -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string ExitDateAttenPartiCesar { get { return _ExitDateAttenPartiCesar; } set { _ExitDateAttenPartiCesar = ValidateValue<string>(value, nameof(ExitDateAttenPartiCesar)); } }
         /// <sumary>
         /// DateBreastfeeding
         /// </sumary>
         private string _DateBreastfeeding;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 51 - Fecha de Consejeria Lactancia M -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateBreastfeeding { get { return _DateBreastfeeding; } set { _DateBreastfeeding = ValidateValue<string>(value, nameof(DateBreastfeeding)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 51 - Fecha de Consejeria Lactancia M -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateBreastfeeding { get { return _DateBreastfeeding; } set { _DateBreastfeeding = ValidateValue<string>(value, nameof(DateBreastfeeding)); } }
         /// <sumary>
         /// DateNewbornCtrl
         /// </sumary>
         private string _DateNewbornCtrl;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))", "Variable 52 - Control de Recien Nacido -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateNewbornCtrl { get { return _DateNewbornCtrl; } set { _DateNewbornCtrl = ValidateValue<string>(value, nameof(DateNewbornCtrl)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 52 - Control de Recien Nacido -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateNewbornCtrl { get { return _DateNewbornCtrl; } set { _DateNewbornCtrl = ValidateValue<string>(value, nameof(DateNewbornCtrl)); } }
         /// <sumary>
         /// DateFamiPlanFirstTime
         /// </sumary>
         private string _DateFamiPlanFirstTime;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 53 - Planificacion Familiar -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateFamiPlanFirstTime { get { return _DateFamiPlanFirstTime; } set { _DateFamiPlanFirstTime = ValidateValue<string>(value, nameof(DateFamiPlanFirstTime)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 53 - Planificacion Familiar -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateFamiPlanFirstTime { get { return _DateFamiPlanFirstTime; } set { _DateFamiPlanFirstTime = ValidateValue<string>(value, nameof(DateFamiPlanFirstTime)); } }
         /// <sumary>
         /// SupplyContracMethod
         /// </sumary>
         private string _SupplyContracMethod;
         [Order]
-        [Regex(@"^([0-9]|1[0-8]|2[0-1])$", "Variable 54 - Suministro Metodo Anticonceptivo -  Solo acepta numeros (0 a 18 - 20-21)")] public string SupplyContracMethod { get { return _SupplyContracMethod; } set { _SupplyContracMethod = ValidateValue<string>(value, nameof(SupplyContracMethod)); } }
+        [Regex(@"^([0-9]|1[0-8]|2[0-1])$", "Variable 54 - Suministro Metodo Anticonceptivo -  Solo acepta numeros (0 a 18 - 20-21).Sin caracteres especiales ni espacios")] public string SupplyContracMethod { get { return _SupplyContracMethod; } set { _SupplyContracMethod = ValidateValue<string>(value, nameof(SupplyContracMethod)); } }
         /// <sumary>
         /// DateContracDelivery
         /// </sumary>
         private string _DateContracDelivery;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 55 - Fecha de Suministro Metodo Anti -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateContracDelivery { get { return _DateContracDelivery; } set { _DateContracDelivery = ValidateValue<string>(value, nameof(DateContracDelivery)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 55 - Fecha de Suministro Metodo Anti -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateContracDelivery { get { return _DateContracDelivery; } set { _DateContracDelivery = ValidateValue<string>(value, nameof(DateContracDelivery)); } }
         /// <sumary>
         /// DateFirstTimePrenaCtrl
         /// </sumary>
         private string _DateFirstTimePrenaCtrl;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 56 - Control Prenatal Primera Vez -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateFirstTimePrenaCtrl { get { return _DateFirstTimePrenaCtrl; } set { _DateFirstTimePrenaCtrl = ValidateValue<string>(value, nameof(DateFirstTimePrenaCtrl)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 56 - Control Prenatal Primera Vez -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateFirstTimePrenaCtrl { get { return _DateFirstTimePrenaCtrl; } set { _DateFirstTimePrenaCtrl = ValidateValue<string>(value, nameof(DateFirstTimePrenaCtrl)); } }
         /// <sumary>
         /// PrenatalCtrl
         /// </sumary>
         private string _PrenatalCtrl;
         [Order]
-        [Regex(@"^([0-9]){1,12}$", "Variable 57 - Control Prenatal -   Solo acepta numero de controles o el codigo 999")] public string PrenatalCtrl { get { return _PrenatalCtrl; } set { _PrenatalCtrl = ValidateValue<string>(value, nameof(PrenatalCtrl)); } }
+        [Regex(@"^([01]?\d|20)$|^(21|22|23|24|25)$|^(999)$", "Variable 57 - Control Prenatal -   Solo acepta numero de controles max 2 caracteres o el codigo 999).Sin caracteres especiales ni espacios")] public string PrenatalCtrl { get { return _PrenatalCtrl; } set { _PrenatalCtrl = ValidateValue<string>(value, nameof(PrenatalCtrl)); } }
         /// <sumary>
         /// DateLastPrenatalCtrl
         /// </sumary>
         private string _DateLastPrenatalCtrl;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 58 - Ultimo Control Prenatal -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateLastPrenatalCtrl { get { return _DateLastPrenatalCtrl; } set { _DateLastPrenatalCtrl = ValidateValue<string>(value, nameof(DateLastPrenatalCtrl)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 58 - Ultimo Control Prenatal -  Solo permite longitud de 10 caracteres (AAAA-MM-DD).Sin caracteres especiales ni espacios")] public string DateLastPrenatalCtrl { get { return _DateLastPrenatalCtrl; } set { _DateLastPrenatalCtrl = ValidateValue<string>(value, nameof(DateLastPrenatalCtrl)); } }
         /// <sumary>
         /// FolicAcidLastPrenaCtrl
         /// </sumary>
         private string _FolicAcidLastPrenaCtrl;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|21)$", "Variable 59 - Suministro Acido Folico -  Solo acepta los valores (0,1,16,17,18,19,20,21)")] public string FolicAcidLastPrenaCtrl { get { return _FolicAcidLastPrenaCtrl; } set { _FolicAcidLastPrenaCtrl = ValidateValue<string>(value, nameof(FolicAcidLastPrenaCtrl)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|20|21)$", "Variable 59 - Suministro Acido Folico -  Solo acepta los valores (0,1,16,17,18,20,21).Sin caracteres especiales ni espacios")] public string FolicAcidLastPrenaCtrl { get { return _FolicAcidLastPrenaCtrl; } set { _FolicAcidLastPrenaCtrl = ValidateValue<string>(value, nameof(FolicAcidLastPrenaCtrl)); } }
         /// <sumary>
         /// FerrSulfLastPrenaCtrl
         /// </sumary>
         private string _FerrSulfLastPrenaCtrl;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|21)$", "Variable 60 - Suministro de Sulfato Ferroso -  Solo acepta los valores (0,1,16,17,18,19,20,21)")] public string FerrSulfLastPrenaCtrl { get { return _FerrSulfLastPrenaCtrl; } set { _FerrSulfLastPrenaCtrl = ValidateValue<string>(value, nameof(FerrSulfLastPrenaCtrl)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|20|21)$", "Variable 60 - Suministro de Sulfato Ferroso -  Solo acepta los valores (0,1,16,17,18,19,20,21).Sin caracteres especiales ni espacios")] public string FerrSulfLastPrenaCtrl { get { return _FerrSulfLastPrenaCtrl; } set { _FerrSulfLastPrenaCtrl = ValidateValue<string>(value, nameof(FerrSulfLastPrenaCtrl)); } }
         /// <sumary>
         /// CalciumLastPrenaCtrl
         /// </sumary>
         private string _CalciumLastPrenaCtrl;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|21)$", "Variable 61 - Suministro Carbonato de Calcio -  Solo acepta los valores (0,1,16,17,18,19,20,21)")] public string CalciumLastPrenaCtrl { get { return _CalciumLastPrenaCtrl; } set { _CalciumLastPrenaCtrl = ValidateValue<string>(value, nameof(CalciumLastPrenaCtrl)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|20|21)$", "Variable 61 - Suministro Carbonato de Calcio -  Solo acepta los valores (0,1,16,17,18,19,20,21).Sin caracteres especiales ni espacios")] public string CalciumLastPrenaCtrl { get { return _CalciumLastPrenaCtrl; } set { _CalciumLastPrenaCtrl = ValidateValue<string>(value, nameof(CalciumLastPrenaCtrl)); } }
         /// <sumary>
         /// DateVisualAssessment
         /// </sumary>
         private string _DateVisualAssessment;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 62 - Fecha de Valoracion Agudeza Visual -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateVisualAssessment { get { return _DateVisualAssessment; } set { _DateVisualAssessment = ValidateValue<string>(value, nameof(DateVisualAssessment)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 62 - Fecha de Valoracion Agudeza Visual -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateVisualAssessment { get { return _DateVisualAssessment; } set { _DateVisualAssessment = ValidateValue<string>(value, nameof(DateVisualAssessment)); } }
         /// <sumary>
         /// DateConsultOphthalm
         /// </sumary>
         private string _DateConsultOphthalm;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 63 - Fecha de Consulta Oftalmologia -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateConsultOphthalm { get { return _DateConsultOphthalm; } set { _DateConsultOphthalm = ValidateValue<string>(value, nameof(DateConsultOphthalm)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 63 - Fecha de Consulta Oftalmologia -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateConsultOphthalm { get { return _DateConsultOphthalm; } set { _DateConsultOphthalm = ValidateValue<string>(value, nameof(DateConsultOphthalm)); } }
         /// <sumary>
         /// DateDiagMalnutrition
         /// </sumary>
         private string _DateDiagMalnutrition;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 64 - Fecha Diagnostico Desnutricion -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateDiagMalnutrition { get { return _DateDiagMalnutrition; } set { _DateDiagMalnutrition = ValidateValue<string>(value, nameof(DateDiagMalnutrition)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 64 - Fecha Diagnostico Desnutricion -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateDiagMalnutrition { get { return _DateDiagMalnutrition; } set { _DateDiagMalnutrition = ValidateValue<string>(value, nameof(DateDiagMalnutrition)); } }
         /// <sumary>
         /// DateConsuVictimAbuse
         /// </sumary>
         private string _DateConsuVictimAbuse;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 65 - Fecha Consulta Mujer Victima Maltrato -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateConsuVictimAbuse { get { return _DateConsuVictimAbuse; } set { _DateConsuVictimAbuse = ValidateValue<string>(value, nameof(DateConsuVictimAbuse)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 65 - Fecha Consulta Mujer Victima Maltrato -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateConsuVictimAbuse { get { return _DateConsuVictimAbuse; } set { _DateConsuVictimAbuse = ValidateValue<string>(value, nameof(DateConsuVictimAbuse)); } }
         /// <sumary>
         /// DateConsuVictSexViolence
         /// </sumary>
         private string _DateConsuVictSexViolence;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 66 - Fecha de Consulta Victima Violencia Sex -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateConsuVictSexViolence { get { return _DateConsuVictSexViolence; } set { _DateConsuVictSexViolence = ValidateValue<string>(value, nameof(DateConsuVictSexViolence)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 66 - Fecha de Consulta Victima Violencia Sex -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateConsuVictSexViolence { get { return _DateConsuVictSexViolence; } set { _DateConsuVictSexViolence = ValidateValue<string>(value, nameof(DateConsuVictSexViolence)); } }
         /// <sumary>
         /// DateNutritionConsult
         /// </sumary>
         private string _DateNutritionConsult;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 67 - Fecha de Consulta de Nutricion -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateNutritionConsult { get { return _DateNutritionConsult; } set { _DateNutritionConsult = ValidateValue<string>(value, nameof(DateNutritionConsult)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 67 - Fecha de Consulta de Nutricion -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateNutritionConsult { get { return _DateNutritionConsult; } set { _DateNutritionConsult = ValidateValue<string>(value, nameof(DateNutritionConsult)); } }
         /// <sumary>
         /// DatePsychologyConsult
         /// </sumary>
         private string _DatePsychologyConsult;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 68 - Fecha de Consulta Psicologia -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DatePsychologyConsult { get { return _DatePsychologyConsult; } set { _DatePsychologyConsult = ValidateValue<string>(value, nameof(DatePsychologyConsult)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 68 - Fecha de Consulta Psicologia -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DatePsychologyConsult { get { return _DatePsychologyConsult; } set { _DatePsychologyConsult = ValidateValue<string>(value, nameof(DatePsychologyConsult)); } }
         /// <sumary>
         /// DateGrowthDev
         /// </sumary>
         private string _DateGrowthDev;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 69 - Fecha Consulta Crecimiento Desarrollo -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateGrowthDev { get { return _DateGrowthDev; } set { _DateGrowthDev = ValidateValue<string>(value, nameof(DateGrowthDev)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 69 - Fecha Consulta Crecimiento Desarrollo -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateGrowthDev { get { return _DateGrowthDev; } set { _DateGrowthDev = ValidateValue<string>(value, nameof(DateGrowthDev)); } }
         /// <sumary>
         /// FerrSulfLastConsuUnderTenY
         /// </sumary>
         private string _FerrSulfLastConsuUnderTenY;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|21)$", "Variable 70 - Suministro de Sulfato Ferroso Menor 10 Años -  Solo acepta los valores (0,1,16,17,18,19,20,21)")] public string FerrSulfLastConsuUnderTenY { get { return _FerrSulfLastConsuUnderTenY; } set { _FerrSulfLastConsuUnderTenY = ValidateValue<string>(value, nameof(FerrSulfLastConsuUnderTenY)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|20|21)$", "Variable 70 - Suministro de Sulfato Ferroso Menor 10 A�os -  Solo acepta los valores (0,1,16,17,18,19,20,21).Sin caracteres especiales ni espacios")] public string FerrSulfLastConsuUnderTenY { get { return _FerrSulfLastConsuUnderTenY; } set { _FerrSulfLastConsuUnderTenY = ValidateValue<string>(value, nameof(FerrSulfLastConsuUnderTenY)); } }
         /// <sumary>
         /// VitALastConsuUnderTenY
         /// </sumary>
         private string _VitALastConsuUnderTenY;
         [Order]
-        [Regex(@"^[0-1]{1}$|^(16|17|18|19|20|21)$", "Variable 71 - Suministro de Vitamina A Menor 10 Años -  Solo acepta los valores (0,1,16,17,18,19,20,21)")] public string VitALastConsuUnderTenY { get { return _VitALastConsuUnderTenY; } set { _VitALastConsuUnderTenY = ValidateValue<string>(value, nameof(VitALastConsuUnderTenY)); } }
+        [Regex(@"^[0-1]{1}$|^(16|17|18|20|21)$", "Variable 71 - Suministro de Vitamina A Menor 10 A�os -  Solo acepta los valores (0,1,16,17,18,19,20,21).Sin caracteres especiales ni espacios")] public string VitALastConsuUnderTenY { get { return _VitALastConsuUnderTenY; } set { _VitALastConsuUnderTenY = ValidateValue<string>(value, nameof(VitALastConsuUnderTenY)); } }
         /// <sumary>
         /// DateYoungConsuFirstTime
         /// </sumary>
         private string _DateYoungConsuFirstTime;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 72 - Fecha de Consulta Joven Primera Vez -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateYoungConsuFirstTime { get { return _DateYoungConsuFirstTime; } set { _DateYoungConsuFirstTime = ValidateValue<string>(value, nameof(DateYoungConsuFirstTime)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 72 - Fecha de Consulta Joven Primera Vez -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateYoungConsuFirstTime { get { return _DateYoungConsuFirstTime; } set { _DateYoungConsuFirstTime = ValidateValue<string>(value, nameof(DateYoungConsuFirstTime)); } }
         /// <sumary>
         /// DateAdultConsuFirstTime
         /// </sumary>
         private string _DateAdultConsuFirstTime;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 73 - Fecha de Consulta Adulto Primera Vez -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateAdultConsuFirstTime { get { return _DateAdultConsuFirstTime; } set { _DateAdultConsuFirstTime = ValidateValue<string>(value, nameof(DateAdultConsuFirstTime)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 73 - Fecha de Consulta Adulto Primera Vez -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateAdultConsuFirstTime { get { return _DateAdultConsuFirstTime; } set { _DateAdultConsuFirstTime = ValidateValue<string>(value, nameof(DateAdultConsuFirstTime)); } }
         /// <sumary>
         /// CondomDelivPatientITS
         /// </sumary>
         private string _CondomDelivPatientITS;
         [Order]
-        [Regex(@"^([0-9]){1,3}$", "Variable 74 - Preservativos Entregados por ITS -  Solo permite longitud de 1 a 3 carácteres numerico")] public string CondomDelivPatientITS { get { return _CondomDelivPatientITS; } set { _CondomDelivPatientITS = ValidateValue<string>(value, nameof(CondomDelivPatientITS)); } }
+        [Regex(@"^0*(?:[1-9][0-9]?|100)$|^(00[1-9]|0[1-9][0-9]|1[0-4][0-9]|150)$|^(993|994|995|996|997|999|0)$", "Variable 74 - Preservativos Entregados por ITS -  Solo permite longitud de 1 a 3 caracteres numerico).Sin caracteres especiales ni espacios")] public string CondomDelivPatientITS { get { return _CondomDelivPatientITS; } set { _CondomDelivPatientITS = ValidateValue<string>(value, nameof(CondomDelivPatientITS)); } }
         /// <sumary>
         /// DatePreTestElisaVIH
         /// </sumary>
         private string _DatePreTestElisaVIH;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 75 - Asesoria PreTest Elisa VIH -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DatePreTestElisaVIH { get { return _DatePreTestElisaVIH; } set { _DatePreTestElisaVIH = ValidateValue<string>(value, nameof(DatePreTestElisaVIH)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 75 - Asesoria PreTest Elisa VIH -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DatePreTestElisaVIH { get { return _DatePreTestElisaVIH; } set { _DatePreTestElisaVIH = ValidateValue<string>(value, nameof(DatePreTestElisaVIH)); } }
         /// <sumary>
         /// DatePostTestElisaVIH
         /// </sumary>
         private string _DatePostTestElisaVIH;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 76 - Asesoria PosTest Elisa VIH -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DatePostTestElisaVIH { get { return _DatePostTestElisaVIH; } set { _DatePostTestElisaVIH = ValidateValue<string>(value, nameof(DatePostTestElisaVIH)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 76 - Asesoria PosTest Elisa VIH -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DatePostTestElisaVIH { get { return _DatePostTestElisaVIH; } set { _DatePostTestElisaVIH = ValidateValue<string>(value, nameof(DatePostTestElisaVIH)); } }
         /// <sumary>
         /// AttentMentalIllness
         /// </sumary>
         private string _AttentMentalIllness;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 77 - Paciente Diagnostico Ansiedad 6 Meses -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string AttentMentalIllness { get { return _AttentMentalIllness; } set { _AttentMentalIllness = ValidateValue<string>(value, nameof(AttentMentalIllness)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 77 - Paciente Diagnostico Ansiedad 6 Meses -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string AttentMentalIllness { get { return _AttentMentalIllness; } set { _AttentMentalIllness = ValidateValue<string>(value, nameof(AttentMentalIllness)); } }
         /// <sumary>
         /// DateHepatitisBPregnant
         /// </sumary>
         private string _DateHepatitisBPregnant;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 78 - Fecha de Antigeno HepatitisB -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateHepatitisBPregnant { get { return _DateHepatitisBPregnant; } set { _DateHepatitisBPregnant = ValidateValue<string>(value, nameof(DateHepatitisBPregnant)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 78 - Fecha de Antigeno HepatitisB -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateHepatitisBPregnant { get { return _DateHepatitisBPregnant; } set { _DateHepatitisBPregnant = ValidateValue<string>(value, nameof(DateHepatitisBPregnant)); } }
         /// <sumary>
         /// ResultHepatitisBPregnant
         /// </sumary>
         private string _ResultHepatitisBPregnant;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 79 - Resultado Antigeno Hepatitis B -  Solo acepta los valores (0,1,2,22)")] public string ResultHepatitisBPregnant { get { return _ResultHepatitisBPregnant; } set { _ResultHepatitisBPregnant = ValidateValue<string>(value, nameof(ResultHepatitisBPregnant)); } }
+        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 79 - Resultado Antigeno Hepatitis B -  Solo acepta los valores (0,1,2,22).Sin caracteres especiales ni espacios")] public string ResultHepatitisBPregnant { get { return _ResultHepatitisBPregnant; } set { _ResultHepatitisBPregnant = ValidateValue<string>(value, nameof(ResultHepatitisBPregnant)); } }
         /// <sumary>
         /// DateSerologySyphilis
         /// </sumary>
         private string _DateSerologySyphilis;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 80 - FechaSerologiaSifilis -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateSerologySyphilis { get { return _DateSerologySyphilis; } set { _DateSerologySyphilis = ValidateValue<string>(value, nameof(DateSerologySyphilis)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 80 - FechaSerologiaSifilis -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateSerologySyphilis { get { return _DateSerologySyphilis; } set { _DateSerologySyphilis = ValidateValue<string>(value, nameof(DateSerologySyphilis)); } }
         /// <sumary>
         /// ResultSerologySyphilis
         /// </sumary>
         private string _ResultSerologySyphilis;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 81 - Resultado Serologia Sifilis -  Solo acepta los valores (0,1,2,22)")] public string ResultSerologySyphilis { get { return _ResultSerologySyphilis; } set { _ResultSerologySyphilis = ValidateValue<string>(value, nameof(ResultSerologySyphilis)); } }
+        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 81 - Resultado Serologia Sifilis -  Solo acepta los valores (0,1,2,22).Sin caracteres especiales ni espacios")] public string ResultSerologySyphilis { get { return _ResultSerologySyphilis; } set { _ResultSerologySyphilis = ValidateValue<string>(value, nameof(ResultSerologySyphilis)); } }
         /// <sumary>
         /// DateElisaTakingVIH
         /// </sumary>
         private string _DateElisaTakingVIH;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 82 - FechaTomaElisaVIH -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateElisaTakingVIH { get { return _DateElisaTakingVIH; } set { _DateElisaTakingVIH = ValidateValue<string>(value, nameof(DateElisaTakingVIH)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 82 - FechaTomaElisaVIH -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateElisaTakingVIH { get { return _DateElisaTakingVIH; } set { _DateElisaTakingVIH = ValidateValue<string>(value, nameof(DateElisaTakingVIH)); } }
         /// <sumary>
         /// ResultElisaVIH
         /// </sumary>
         private string _ResultElisaVIH;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 83 - Resultado Elisa VIH -  Solo acepta los valores (0,1,2,22)")] public string ResultElisaVIH { get { return _ResultElisaVIH; } set { _ResultElisaVIH = ValidateValue<string>(value, nameof(ResultElisaVIH)); } }
+        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 83 - Resultado Elisa VIH -  Solo acepta los valores (0,1,2,22).Sin caracteres especiales ni espacios")] public string ResultElisaVIH { get { return _ResultElisaVIH; } set { _ResultElisaVIH = ValidateValue<string>(value, nameof(ResultElisaVIH)); } }
         /// <sumary>
         /// DateNeonatalTSH
         /// </sumary>
         private string _DateNeonatalTSH;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 84 - Fecha TSH Neonatal -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateNeonatalTSH { get { return _DateNeonatalTSH; } set { _DateNeonatalTSH = ValidateValue<string>(value, nameof(DateNeonatalTSH)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 84 - Fecha TSH Neonatal -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateNeonatalTSH { get { return _DateNeonatalTSH; } set { _DateNeonatalTSH = ValidateValue<string>(value, nameof(DateNeonatalTSH)); } }
         /// <sumary>
         /// ResultNeonatalTSH
         /// </sumary>
         private string _ResultNeonatalTSH;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 85 - Resultado TSH Neonatal -  Solo acepta los valores (0,1,2,22)")] public string ResultNeonatalTSH { get { return _ResultNeonatalTSH; } set { _ResultNeonatalTSH = ValidateValue<string>(value, nameof(ResultNeonatalTSH)); } }
+        [Regex(@"^[0-2]{1}$|^(22)$", "Variable 85 - Resultado TSH Neonatal -  Solo acepta los valores (0,1,2,22).Sin caracteres especiales ni espacios")] public string ResultNeonatalTSH { get { return _ResultNeonatalTSH; } set { _ResultNeonatalTSH = ValidateValue<string>(value, nameof(ResultNeonatalTSH)); } }
         /// <sumary>
         /// CervicalCancerScreening
         /// </sumary>
         private string _CervicalCancerScreening;
         [Order]
-        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 86 - Tamizaje Cancer Cuello Uterino -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22)")] public string CervicalCancerScreening { get { return _CervicalCancerScreening; } set { _CervicalCancerScreening = ValidateValue<string>(value, nameof(CervicalCancerScreening)); } }
+        [Regex(@"^[0-3]{1}$|^(16|17|18|19|20|22)$", "Variable 86 - Tamizaje Cancer Cuello Uterino -  Solo acepta los valores (0,1,2,3,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string CervicalCancerScreening { get { return _CervicalCancerScreening; } set { _CervicalCancerScreening = ValidateValue<string>(value, nameof(CervicalCancerScreening)); } }
         /// <sumary>
         /// DateCervicalCytology
         /// </sumary>
         private string _DateCervicalCytology;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 87 - Fecha de Citologia Cervico Uterina -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateCervicalCytology { get { return _DateCervicalCytology; } set { _DateCervicalCytology = ValidateValue<string>(value, nameof(DateCervicalCytology)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 87 - Fecha de Citologia Cervico Uterina -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateCervicalCytology { get { return _DateCervicalCytology; } set { _DateCervicalCytology = ValidateValue<string>(value, nameof(DateCervicalCytology)); } }
         /// <sumary>
         /// ResultCervicalCytology
         /// </sumary>
         private string _ResultCervicalCytology;
         [Order]
-        [Regex(@"^[0-9]{1}$|^(10|11|12|13|14|15|16|17|18|999)$", "Variable 88 - CitologiaCervicoUterina -  Solo acepta los valores (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18) ó (999)")] public string ResultCervicalCytology { get { return _ResultCervicalCytology; } set { _ResultCervicalCytology = ValidateValue<string>(value, nameof(ResultCervicalCytology)); } }
+        [Regex(@"^[0-9]{1}$|^(10|11|12|13|14|15|16|17|18|999)$", "Variable 88 - CitologiaCervicoUterina -  Solo acepta los valores (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18) o (999).Sin caracteres especiales ni espacios")] public string ResultCervicalCytology { get { return _ResultCervicalCytology; } set { _ResultCervicalCytology = ValidateValue<string>(value, nameof(ResultCervicalCytology)); } }
         /// <sumary>
         /// QualityCytologySample
         /// </sumary>
         private string _QualityCytologySample;
         [Order]
-        [Regex(@"^[0-4]{1}$|^(999)$", "Variable 89 - Calidad Muestra Citologia -  Solo acepta los valores (0,1,2,3,4,999)")] public string QualityCytologySample { get { return _QualityCytologySample; } set { _QualityCytologySample = ValidateValue<string>(value, nameof(QualityCytologySample)); } }
+        [Regex(@"^[0-4]{1}$|^(999)$", "Variable 89 - Calidad Muestra Citologia -  Solo acepta los valores (0,1,2,3,4,999).Sin caracteres especiales ni espacios")] public string QualityCytologySample { get { return _QualityCytologySample; } set { _QualityCytologySample = ValidateValue<string>(value, nameof(QualityCytologySample)); } }
         /// <sumary>
         /// HabilitationCodeCytology
         /// </sumary>
         private string _HabilitationCodeCytology;
         [Order]
-        [Regex(@"^[0-9]{1,12}$", "Variable 90 - Codigo de Habilitacion IPS Citologia -  Solo permite longitud de 1 a 12 carácteres numerico")] public string HabilitationCodeCytology { get { return _HabilitationCodeCytology; } set { _HabilitationCodeCytology = ValidateValue<string>(value, nameof(HabilitationCodeCytology)); } }
+        [Regex(@"^[0-9]{12}$|^(0|999)$", "Variable 90 - Codigo de Habilitacion IPS Citologia -  Solo permite longitud de  12 caracteres numerico).Sin caracteres especiales ni espacios")] public string HabilitationCodeCytology { get { return _HabilitationCodeCytology; } set { _HabilitationCodeCytology = ValidateValue<string>(value, nameof(HabilitationCodeCytology)); } }
         /// <sumary>
         /// DateColposcopy
         /// </sumary>
         private string _DateColposcopy;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 91 - Fecha de Colposcopia -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateColposcopy { get { return _DateColposcopy; } set { _DateColposcopy = ValidateValue<string>(value, nameof(DateColposcopy)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 91 - Fecha de Colposcopia -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateColposcopy { get { return _DateColposcopy; } set { _DateColposcopy = ValidateValue<string>(value, nameof(DateColposcopy)); } }
         /// <sumary>
         /// HabilitationCodeColposcopy
         /// </sumary>
         private string _HabilitationCodeColposcopy;
         [Order]
-        [Regex(@"^[0-9]{1,12}$", "Variable 92 - Codigo de Habilitacion Colposcopia -  Solo permite longitud de 1 a 12 carácteres numerico")] public string HabilitationCodeColposcopy { get { return _HabilitationCodeColposcopy; } set { _HabilitationCodeColposcopy = ValidateValue<string>(value, nameof(HabilitationCodeColposcopy)); } }
+        [Regex(@"^[0-9]{12}$|^(0|999)$", "Variable 92 - Codigo de Habilitacion Colposcopia -  Solo permite longitud de 12 caracteres numerico).Sin caracteres especiales ni espacios")] public string HabilitationCodeColposcopy { get { return _HabilitationCodeColposcopy; } set { _HabilitationCodeColposcopy = ValidateValue<string>(value, nameof(HabilitationCodeColposcopy)); } }
         /// <sumary>
         /// DateCervicalBiopsy
         /// </sumary>
         private string _DateCervicalBiopsy;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 93 - Fecha Biopsia Cervical -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateCervicalBiopsy { get { return _DateCervicalBiopsy; } set { _DateCervicalBiopsy = ValidateValue<string>(value, nameof(DateCervicalBiopsy)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 93 - Fecha Biopsia Cervical -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateCervicalBiopsy { get { return _DateCervicalBiopsy; } set { _DateCervicalBiopsy = ValidateValue<string>(value, nameof(DateCervicalBiopsy)); } }
         /// <sumary>
         /// ResultCervicalBiopsy
         /// </sumary>
         private string _ResultCervicalBiopsy;
         [Order]
-        [Regex(@"^[0-6]{1}$|^(999)$", "Variable 94 - Resultado Biopsia Cervical -  Solo acepta los valores (0,1,2,3,4,5,6) O 999")] public string ResultCervicalBiopsy { get { return _ResultCervicalBiopsy; } set { _ResultCervicalBiopsy = ValidateValue<string>(value, nameof(ResultCervicalBiopsy)); } }
+        [Regex(@"^[0-6]{1}$|^(999)$", "Variable 94 - Resultado Biopsia Cervical -  Solo acepta los valores (0,1,2,3,4,5,6) O 999.Sin caracteres especiales ni espacios")] public string ResultCervicalBiopsy { get { return _ResultCervicalBiopsy; } set { _ResultCervicalBiopsy = ValidateValue<string>(value, nameof(ResultCervicalBiopsy)); } }
         /// <sumary>
         /// HabilitationCodeBiopsy
         /// </sumary>
         private string _HabilitationCodeBiopsy;
         [Order]
-        [Regex(@"^[0-9]{1,12}$", "Variable 95 - Codigo de Habilitacion IPS Biopsia -  Solo permite longitud de 1 a 12 carácteres numerico")] public string HabilitationCodeBiopsy { get { return _HabilitationCodeBiopsy; } set { _HabilitationCodeBiopsy = ValidateValue<string>(value, nameof(HabilitationCodeBiopsy)); } }
+        [Regex(@"^[0-9]{12}$|^(0|999)$", "Variable 95 - Codigo de Habilitacion IPS Biopsia -  Solo permite longitud de  12 caracteres numerico).Sin caracteres especiales ni espacios")] public string HabilitationCodeBiopsy { get { return _HabilitationCodeBiopsy; } set { _HabilitationCodeBiopsy = ValidateValue<string>(value, nameof(HabilitationCodeBiopsy)); } }
         /// <sumary>
         /// DateMammography
         /// </sumary>
         private string _DateMammography;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 96 - Fecha de Mamografia -  Solo permite longitud de 10 carácteres AAAA-MM-DD ")] public string DateMammography { get { return _DateMammography; } set { _DateMammography = ValidateValue<string>(value, nameof(DateMammography)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 96 - Fecha de Mamografia -  Solo permite longitud de 10 caracteres AAAA-MM-DD ).Sin caracteres especiales ni espacios")] public string DateMammography { get { return _DateMammography; } set { _DateMammography = ValidateValue<string>(value, nameof(DateMammography)); } }
         /// <sumary>
         /// ResultMammography
         /// </sumary>
         private string _ResultMammography;
         [Order]
-        [Regex(@"^[0-7]{1}$|^(999)$", "Variable 97 - Resultado Mamografia -  Solo acepta (0,1,2,3,4,5,6,7) codigo 999")] public string ResultMammography { get { return _ResultMammography; } set { _ResultMammography = ValidateValue<string>(value, nameof(ResultMammography)); } }
+        [Regex(@"^[0-7]{1}$|^(999)$", "Variable 97 - Resultado Mamografia -  Solo acepta (0,1,2,3,4,5,6,7) codigo 999.Sin caracteres especiales ni espacios")] public string ResultMammography { get { return _ResultMammography; } set { _ResultMammography = ValidateValue<string>(value, nameof(ResultMammography)); } }
         /// <sumary>
         /// HabilitationCodeMammography
         /// </sumary>
         private string _HabilitationCodeMammography;
         [Order]
-        [Regex(@"^[0-9]{1,12}$", "Variable 98 - Codigo Habilitacion IPS Mamografia -  Solo acepta el codigo REPS de 12 digitos o el codigo 999")] public string HabilitationCodeMammography { get { return _HabilitationCodeMammography; } set { _HabilitationCodeMammography = ValidateValue<string>(value, nameof(HabilitationCodeMammography)); } }
+        [Regex(@"^[0-9]{12}$|^(0|999)$", "Variable 98 - Codigo Habilitacion IPS Mamografia -  Solo acepta el codigo REPS de 12 caracteres o el codigo 999.Sin caracteres especiales ni espacios")] public string HabilitationCodeMammography { get { return _HabilitationCodeMammography; } set { _HabilitationCodeMammography = ValidateValue<string>(value, nameof(HabilitationCodeMammography)); } }
         /// <sumary>
         /// DateBreastBiopsyBACAF
         /// </sumary>
         private string _DateBreastBiopsyBACAF;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 99 - Fecha de Toma Biopsia Seno BACAF -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateBreastBiopsyBACAF { get { return _DateBreastBiopsyBACAF; } set { _DateBreastBiopsyBACAF = ValidateValue<string>(value, nameof(DateBreastBiopsyBACAF)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 99 - Fecha de Toma Biopsia Seno BACAF -  Solo acepta fecha valida con formato AAAA-MM-DD.si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateBreastBiopsyBACAF { get { return _DateBreastBiopsyBACAF; } set { _DateBreastBiopsyBACAF = ValidateValue<string>(value, nameof(DateBreastBiopsyBACAF)); } }
         /// <sumary>
         /// DateResultBreastBiopsy
         /// </sumary>
         private string _DateResultBreastBiopsy;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 100 - Fecha de Resultado Biopsia Seno BACAF -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateResultBreastBiopsy { get { return _DateResultBreastBiopsy; } set { _DateResultBreastBiopsy = ValidateValue<string>(value, nameof(DateResultBreastBiopsy)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 100 - Fecha de Resultado Biopsia Seno BACAF -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateResultBreastBiopsy { get { return _DateResultBreastBiopsy; } set { _DateResultBreastBiopsy = ValidateValue<string>(value, nameof(DateResultBreastBiopsy)); } }
         /// <sumary>
         /// ResultBiopsyBreast
         /// </sumary>
         private string _ResultBiopsyBreast;
         [Order]
-        [Regex(@"^[0-5]{1}$|^(999)$", "Variable 101 - BiopsiaSenoBACAF -  Solo acepta (0,1,2,3,4,5) codigo 999")] public string ResultBiopsyBreast { get { return _ResultBiopsyBreast; } set { _ResultBiopsyBreast = ValidateValue<string>(value, nameof(ResultBiopsyBreast)); } }
+        [Regex(@"^[0-5]{1}$|^(999)$", "Variable 101 - BiopsiaSenoBACAF -  Solo acepta (0,1,2,3,4,5) codigo 999.Sin caracteres especiales ni espacios")] public string ResultBiopsyBreast { get { return _ResultBiopsyBreast; } set { _ResultBiopsyBreast = ValidateValue<string>(value, nameof(ResultBiopsyBreast)); } }
         /// <sumary>
         /// HabiliationCodeBiopsyBreast
         /// </sumary>
         private string _HabiliationCodeBiopsyBreast;
         [Order]
-        [Regex(@"^[0-9]{1,12}$", "Variable 102 - CodigoHabilitacionIPSSenoBACAF -  Solo acepta el codigo REPS de 12 digitos o el codigo 999")] public string HabiliationCodeBiopsyBreast { get { return _HabiliationCodeBiopsyBreast; } set { _HabiliationCodeBiopsyBreast = ValidateValue<string>(value, nameof(HabiliationCodeBiopsyBreast)); } }
+        [Regex(@"^[0-9]{12}$|^(0|999)$", "Variable 102 - CodigoHabilitacionIPSSenoBACAF -  Solo acepta el codigo REPS de 12 digitos o el codigo 999.Sin caracteres especiales ni espacios")] public string HabiliationCodeBiopsyBreast { get { return _HabiliationCodeBiopsyBreast; } set { _HabiliationCodeBiopsyBreast = ValidateValue<string>(value, nameof(HabiliationCodeBiopsyBreast)); } }
         /// <sumary>
         /// DateHemoglobin
         /// </sumary>
         private string _DateHemoglobin;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 103 - Fecha de Toma Hemoglobina -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateHemoglobin { get { return _DateHemoglobin; } set { _DateHemoglobin = ValidateValue<string>(value, nameof(DateHemoglobin)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 103 - Fecha de Toma Hemoglobina -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateHemoglobin { get { return _DateHemoglobin; } set { _DateHemoglobin = ValidateValue<string>(value, nameof(DateHemoglobin)); } }
         /// <sumary>
         /// ResultHemoglobin
         /// </sumary>
         private string _ResultHemoglobin;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$", "Variable 104 - Hemoglobina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.)), si no reporta ingrese el numero (0)")] public string ResultHemoglobin { get { return _ResultHemoglobin; } set { _ResultHemoglobin = ValidateValue<string>(value, nameof(ResultHemoglobin)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 104 - Hemoglobina -  Solo acepta dato reportado por el laboratorio (max 1 decimal delimitado por punto(.) si no reporta ingrese el numero (0).Sin caracteres especiales ni espacios")] public string ResultHemoglobin { get { return _ResultHemoglobin; } set { _ResultHemoglobin = ValidateValue<string>(value, nameof(ResultHemoglobin)); } }
         /// <sumary>
         /// DateGlycemia
         /// </sumary>
         private string _DateGlycemia;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 105 - Fecha de Toma Glicemia Basal -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateGlycemia { get { return _DateGlycemia; } set { _DateGlycemia = ValidateValue<string>(value, nameof(DateGlycemia)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 105 - Fecha de Toma Glicemia Basal -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateGlycemia { get { return _DateGlycemia; } set { _DateGlycemia = ValidateValue<string>(value, nameof(DateGlycemia)); } }
         /// <sumary>
         /// DateCreatinine
         /// </sumary>
         private string _DateCreatinine;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 106 - Fecha de Creatinina -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateCreatinine { get { return _DateCreatinine; } set { _DateCreatinine = ValidateValue<string>(value, nameof(DateCreatinine)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 106 - Fecha de Creatinina -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateCreatinine { get { return _DateCreatinine; } set { _DateCreatinine = ValidateValue<string>(value, nameof(DateCreatinine)); } }
         /// <sumary>
         /// ResultCreatinine
         /// </sumary>
         private string _ResultCreatinine;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$|(0|999)$", "Variable 107 - Creatinina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.)) si no tiene el dato registrar (999) si no aplica registrar (0)")] public string ResultCreatinine { get { return _ResultCreatinine; } set { _ResultCreatinine = ValidateValue<string>(value, nameof(ResultCreatinine)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|(0|999)$", "Variable 107 - Creatinina -  Solo acepta dato reportado por el laboratorio (max 1 decimal delimitado por punto(.)) si no tiene el dato registrar (999) si no aplica registrar (0).Sin caracteres especiales ni espacios")] public string ResultCreatinine { get { return _ResultCreatinine; } set { _ResultCreatinine = ValidateValue<string>(value, nameof(ResultCreatinine)); } }
         /// <sumary>
         /// DateGlycosylatedHemoglobin
         /// </sumary>
         private string _DateGlycosylatedHemoglobin;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 108 - Fecha de Hemoglobina Glicosilada -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateGlycosylatedHemoglobin { get { return _DateGlycosylatedHemoglobin; } set { _DateGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(DateGlycosylatedHemoglobin)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 108 - Fecha de Hemoglobina Glicosilada -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateGlycosylatedHemoglobin { get { return _DateGlycosylatedHemoglobin; } set { _DateGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(DateGlycosylatedHemoglobin)); } }
         /// <sumary>
         /// ResultGlycosylatedHemoglobin
         /// </sumary>
         private string _ResultGlycosylatedHemoglobin;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$", "Variable 109 - Resultado Hemoglobina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.)), si no reporta ingrese el numero (0) cero o 999")] public string ResultGlycosylatedHemoglobin { get { return _ResultGlycosylatedHemoglobin; } set { _ResultGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(ResultGlycosylatedHemoglobin)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 109 - Resultado Hemoglobina -  Solo acepta dato reportado por el laboratorio ( max 1 decimal delimitado por punto(.)) si no reporta ingrese el numero (0) cero o 999.Sin caracteres especiales ni espacios")] public string ResultGlycosylatedHemoglobin { get { return _ResultGlycosylatedHemoglobin; } set { _ResultGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(ResultGlycosylatedHemoglobin)); } }
         /// <sumary>
         /// DateMicroalbuminuria
         /// </sumary>
         private string _DateMicroalbuminuria;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 110 - Fecha de Toma Microalbuminuria -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateMicroalbuminuria { get { return _DateMicroalbuminuria; } set { _DateMicroalbuminuria = ValidateValue<string>(value, nameof(DateMicroalbuminuria)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 110 - Fecha de Toma Microalbuminuria -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateMicroalbuminuria { get { return _DateMicroalbuminuria; } set { _DateMicroalbuminuria = ValidateValue<string>(value, nameof(DateMicroalbuminuria)); } }
         /// <sumary>
         /// DateHDL
         /// </sumary>
         private string _DateHDL;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 111 - Fecha de Toma HDL -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateHDL { get { return _DateHDL; } set { _DateHDL = ValidateValue<string>(value, nameof(DateHDL)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 111 - Fecha de Toma HDL -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateHDL { get { return _DateHDL; } set { _DateHDL = ValidateValue<string>(value, nameof(DateHDL)); } }
         /// <sumary>
         /// DateBacilloscopy
         /// </sumary>
         private string _DateBacilloscopy;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 112 - Fecha de Toma Baciloscopia -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string DateBacilloscopy { get { return _DateBacilloscopy; } set { _DateBacilloscopy = ValidateValue<string>(value, nameof(DateBacilloscopy)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 112 - Fecha de Toma Baciloscopia -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string DateBacilloscopy { get { return _DateBacilloscopy; } set { _DateBacilloscopy = ValidateValue<string>(value, nameof(DateBacilloscopy)); } }
         /// <sumary>
         /// ResultBacilloscopy
         /// </sumary>
         private string _ResultBacilloscopy;
         [Order]
-        [Regex(@"^[1-4]{1}$|^(22)$", "Variable 113 - Baciloscopia Diagnostico -  Solo acepta los valores (1,2,3,4,22)")] public string ResultBacilloscopy { get { return _ResultBacilloscopy; } set { _ResultBacilloscopy = ValidateValue<string>(value, nameof(ResultBacilloscopy)); } }
+        [Regex(@"^[1-4]{1}$|^(22)$", "Variable 113 - Baciloscopia Diagnostico -  Solo acepta los valores (1,2,3,4,22).Sin caracteres especiales ni espacios")] public string ResultBacilloscopy { get { return _ResultBacilloscopy; } set { _ResultBacilloscopy = ValidateValue<string>(value, nameof(ResultBacilloscopy)); } }
         /// <sumary>
         /// TreatmentCongenitalHypothyroidism
         /// </sumary>
         private string _TreatmentCongenitalHypothyroidism;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 114 - TratamientoHipotiroidismoCongenito -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string TreatmentCongenitalHypothyroidism { get { return _TreatmentCongenitalHypothyroidism; } set { _TreatmentCongenitalHypothyroidism = ValidateValue<string>(value, nameof(TreatmentCongenitalHypothyroidism)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 114 - TratamientoHipotiroidismoCongenito -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TreatmentCongenitalHypothyroidism { get { return _TreatmentCongenitalHypothyroidism; } set { _TreatmentCongenitalHypothyroidism = ValidateValue<string>(value, nameof(TreatmentCongenitalHypothyroidism)); } }
         /// <sumary>
         /// TreatmentGestationalSyphilis
         /// </sumary>
         private string _TreatmentGestationalSyphilis;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 115 - TratamientoSifilisGestacional -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string TreatmentGestationalSyphilis { get { return _TreatmentGestationalSyphilis; } set { _TreatmentGestationalSyphilis = ValidateValue<string>(value, nameof(TreatmentGestationalSyphilis)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 115 - TratamientoSifilisGestacional -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TreatmentGestationalSyphilis { get { return _TreatmentGestationalSyphilis; } set { _TreatmentGestationalSyphilis = ValidateValue<string>(value, nameof(TreatmentGestationalSyphilis)); } }
         /// <sumary>
         /// TreatmentCongenitalSyphilis
         /// </sumary>
         private string _TreatmentCongenitalSyphilis;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 116 - TratamientoSifilisCongenita -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string TreatmentCongenitalSyphilis { get { return _TreatmentCongenitalSyphilis; } set { _TreatmentCongenitalSyphilis = ValidateValue<string>(value, nameof(TreatmentCongenitalSyphilis)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 116 - TratamientoSifilisCongenita -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TreatmentCongenitalSyphilis { get { return _TreatmentCongenitalSyphilis; } set { _TreatmentCongenitalSyphilis = ValidateValue<string>(value, nameof(TreatmentCongenitalSyphilis)); } }
         /// <sumary>
         /// TreatmentLeprosy
         /// </sumary>
         private string _TreatmentLeprosy;
         [Order]
-        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 117 - Tratamiento de Lepra -  Solo acepta los valores (0,1,2,16,17,18,19,20,22)")] public string TreatmentLeprosy { get { return _TreatmentLeprosy; } set { _TreatmentLeprosy = ValidateValue<string>(value, nameof(TreatmentLeprosy)); } }
+        [Regex(@"^[0-2]{1}$|^(16|17|18|19|20|22)$", "Variable 117 - Tratamiento de Lepra -  Solo acepta los valores (0,1,2,16,17,18,19,20,22).Sin caracteres especiales ni espacios")] public string TreatmentLeprosy { get { return _TreatmentLeprosy; } set { _TreatmentLeprosy = ValidateValue<string>(value, nameof(TreatmentLeprosy)); } }
         /// <sumary>
         /// EndDateTreatmentLeishmaniasis
         /// </sumary>
         private string _EndDateTreatmentLeishmaniasis;
         [Order]
-        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 118 - Fecha de Terminacion Leishmaniasis -  Solo acepta fecha valida con formato AAAA-MM-DD, si no se toma registrar 1800-01-01")] public string EndDateTreatmentLeishmaniasis { get { return _EndDateTreatmentLeishmaniasis; } set { _EndDateTreatmentLeishmaniasis = ValidateValue<string>(value, nameof(EndDateTreatmentLeishmaniasis)); } }
+        [Regex(@"^([12]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]))$", "Variable 118 - Fecha de Terminacion Leishmaniasis -  Solo acepta fecha valida con formato AAAA-MM-DD si no se toma registrar 1800-01-01.Sin caracteres especiales ni espacios")] public string EndDateTreatmentLeishmaniasis { get { return _EndDateTreatmentLeishmaniasis; } set { _EndDateTreatmentLeishmaniasis = ValidateValue<string>(value, nameof(EndDateTreatmentLeishmaniasis)); } }
         #endregion
 
         #region Builders
@@ -24581,7 +24772,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         [Order]
         public long Year { get { return _Year; } set { _Year = ValidateValue<long>(value, nameof(Year)); } }
         /// <sumary>
-        /// CaseNumber
+        /// UserCode
         /// </sumary>
         private string _UserCode;
         [Order]

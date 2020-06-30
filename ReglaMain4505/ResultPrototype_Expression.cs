@@ -19,6 +19,10 @@ using System.Runtime.CompilerServices;
 
 namespace OpheliaSuiteV2.BRMRuntime
 {
+
+
+
+
     /// <sumary>
     /// ResultPrototype_Expression
     /// </sumary> 
@@ -841,135 +845,145 @@ namespace OpheliaSuiteV2.BRMRuntime
             var listDocumentTypesDB = JsonConvert.DeserializeObject<List<dynamic>>(documentTypes.Result.ToString());
             Helper.USR_ValidateDocumentNumber4505(adapterId, _entity, listErrors, index, listDocumentTypesDB, info);
 
-            index = 1;
+
+
+            DateTime ConvertDate(string date)
+            {
+                IFormatProvider FORMAT_PROVIDER = CultureInfo.InvariantCulture;
+                string FORMAT_DATE = "dd/MM/yyyy";
+                return DateTime.ParseExact(Convert.ToDateTime(date).ToString("dd/MM/yyyy"), FORMAT_DATE, FORMAT_PROVIDER);
+            }
+
+            index = 0;
             foreach (var ent in _entity)
             {
-                var CutOffDate = DateTime.Now;
-                var InitialDate = Convert.ToDateTime(DateInit);
-                var EndDate = Convert.ToDateTime(DateEnd);
+                var CutOffDate = ConvertDate(DateTime.Now.ToString());
+                var InitialDate = ConvertDate(DateInit);
+                var EndDate = ConvertDate(DateEnd);
                 //Valida Codigos de habilitacion existentes en la BD  -  Codigos de Ocupacion 
-                Helper.USR_FieldsValidate4505(listErrors, index, listaQualification, listOccupationCode, ent);
+                Helper.USR_FieldsValidate4505(listErrors, (index + 1), listaQualification, listOccupationCode, ent);
 
+                ent.WeightKg = ent.WeightKg.Replace(",", ".").ToString();
                 //Ejecuta las reglas del BRM
                 var res = Helper.SYS_VerificationPrototype(new Func<object>[]
                 {
-                    () => RUL_TypeRegister.Execute(Convert.ToInt32(ent.TypeRegister)),
+                     () => RUL_TypeRegister.Execute(Convert.ToInt32(ent.TypeRegister)),
                      () => RUL_HabilitationCode.Execute(ent.HabilitationCode),
                      () => RUL_IdentificationType.Execute(ent.IdentificationType),
                      () => RUL_FirstLastName.Execute(ent.FirstLastName),
                      () => RUL_SecondLastName.Execute(ent.SecondLastName),
                      () => RUL_FirstName.Execute(ent.FirstName),
                      () => RUL_SecondName.Execute(ent.SecondName),
-                     () => RUL_BirthDate.Execute(Convert.ToDateTime(ent.BirthDate)),
+                     () => RUL_BirthDate.Execute(ConvertDate(ent.BirthDate)),
                      () => RUL_IdSex.Execute(ent.IdSex),
                      () => RUL_CodeEthnic.Execute(Convert.ToInt32(ent.CodeEthnic)),
                      () => RUL_OccupationCode.Execute(ent.OccupationCode),
                      () => RUL_CodeEducaLevel.Execute(Convert.ToInt32(ent.CodeEducaLevel)),
-                     () => RUL_Gestation.Execute(Convert.ToInt32(ent.Gestation),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_GestaCongeSyphilis.Execute(Convert.ToInt32(ent.GestaCongeSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.SexTransInfect)),
-                     () => RUL_HypertenInducPreg.Execute(Convert.ToInt32(ent.HypertenInducPreg),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_CongeHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_Gestation.Execute(Convert.ToInt32(ent.Gestation),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_GestaCongeSyphilis.Execute(Convert.ToInt32(ent.GestaCongeSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.SexTransInfect)),
+                     () => RUL_HypertenInducPreg.Execute(Convert.ToInt32(ent.HypertenInducPreg),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_CongeHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_SymptRespiratory.Execute(Convert.ToInt32(ent.SymptRespiratory),Convert.ToInt32(ent.ResultBacilloscopy)),
                      () => RUL_MultiDrugResisTuber.Execute(Convert.ToInt32(ent.MultiDrugResisTuber)),
                      () => RUL_Leprosy.Execute(Convert.ToInt32(ent.Leprosy),Convert.ToInt32(ent.TreatmentLeprosy)),
-                     () => RUL_ObesCaloProtMalnut.Execute(Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateDiagMalnutrition),Convert.ToDouble(ent.WeightKg),Convert.ToInt32(ent.HeightCm)),
-                     () => RUL_AbuseVictim.Execute(Convert.ToInt32(ent.AbuseVictim),ent.IdSex,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateConsuVictimAbuse),CutOffDate),
-                     () => RUL_VictimSexViolence.Execute(Convert.ToInt32(ent.VictimSexViolence),Convert.ToDateTime(ent.DateConsuVictSexViolence)),
+                     () => RUL_ObesCaloProtMalnut.Execute(Convert.ToInt32(ent.ObesCaloProtMalnut),ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateDiagMalnutrition),Convert.ToDouble(ent.WeightKg.Replace(",", ".")),Convert.ToInt32(ent.HeightCm)),
+                     () => RUL_AbuseVictim.Execute(Convert.ToInt32(ent.AbuseVictim),ent.IdSex,ConvertDate(ent.BirthDate),ConvertDate(ent.DateConsuVictimAbuse),CutOffDate),
+                     () => RUL_VictimSexViolence.Execute(Convert.ToInt32(ent.VictimSexViolence),ConvertDate(ent.DateConsuVictSexViolence)),
                      () => RUL_SexTransInfect.Execute(Convert.ToInt32(ent.SexTransInfect)),
                      () => RUL_DiagMentalIllness.Execute(Convert.ToInt32(ent.DiagMentalIllness)),
                      () => RUL_CervixCancer.Execute(Convert.ToInt32(ent.CervixCancer),ent.IdSex),
                      () => RUL_BreastCancer.Execute(Convert.ToInt32(ent.BreastCancer)),
                      () => RUL_DentalFluorosis.Execute(Convert.ToInt32(ent.DentalFluorosis)),
-                     () => RUL_DateWeight.Execute(Convert.ToDateTime(ent.DateWeight),InitialDate,EndDate,Convert.ToDouble(ent.WeightKg)),
-                     () => RUL_WeightKg.Execute(Convert.ToDouble(ent.WeightKg),Convert.ToDateTime(ent.DateWeight)),
-                     () => RUL_DateHeight.Execute(Convert.ToDateTime(ent.DateHeight),InitialDate,EndDate,Convert.ToDouble(ent.HeightCm)),
-                     () => RUL_HeightCm.Execute(Convert.ToDouble(ent.HeightCm),Convert.ToDateTime(ent.DateHeight)),
-                     () => RUL_DateEstimPartitium.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.DateEstimPartitium),Convert.ToDateTime(ent.BirthDate),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateFirstTimePrenaCtrl)),
-                     () => RUL_GestaAgeBorn.Execute(Convert.ToInt32(ent.GestaAgeBorn),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_PPBCG.Execute(Convert.ToInt32(ent.BCG),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_HepatBUnderOneYear.Execute(Convert.ToInt32(ent.HepatBUnderOneYear),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Pentavalent.Execute(Convert.ToInt32(ent.Pentavalent),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Polio.Execute(Convert.ToInt32(ent.Polio),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DPTUnderFiveYears.Execute(Convert.ToInt32(ent.DPTUnderFiveYears),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Rotavirus.Execute(Convert.ToInt32(ent.Rotavirus),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_Pneumococcus.Execute(Convert.ToInt32(ent.Pneumococcus),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_InfluenzaChildren.Execute(Convert.ToInt32(ent.InfluenzaChildren),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_YellowFeverOneY.Execute(Convert.ToInt32(ent.YellowFeverOneY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_HepatitisA.Execute(Convert.ToInt32(ent.HepatitisA),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_TriViralChild.Execute(Convert.ToInt32(ent.TriViralChild),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_PPVPH.Execute(Convert.ToInt32(ent.VPH),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_TDorTTWomFertAge.Execute(Convert.ToInt32(ent.TDorTTWomFertAge),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_BactPlateCtrl.Execute(Convert.ToInt32(ent.BactPlateCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateAttenPartiCesar.Execute(Convert.ToDateTime(ent.DateAttenPartiCesar),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_ExitDateAttenPartiCesar.Execute(Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.ExitDateAttenPartiCesar),ent.IdSex,Convert.ToDateTime(ent.DateAttenPartiCesar)),
-                     () => RUL_DateBreastfeeding.Execute(CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateBreastfeeding),InitialDate,ent.IdSex),
-                     () => RUL_DateNewbornCtrl.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateNewbornCtrl)),
-                     () => RUL_DateFamiPlanFirstTime.Execute(InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToDateTime(ent.DateFamiPlanFirstTime)),
-                     () => RUL_SupplyContracMethod.Execute(Convert.ToInt32(ent.SupplyContracMethod),Convert.ToDateTime(ent.DateContracDelivery),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateContracDelivery.Execute(Convert.ToDateTime(ent.DateContracDelivery),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateFirstTimePrenaCtrl.Execute(Convert.ToDateTime(ent.DateFirstTimePrenaCtrl),ent.IdSex,Convert.ToDateTime(ent.BirthDate),Convert.ToInt32(ent.Gestation),CutOffDate,Convert.ToDateTime(ent.DateLastPrenatalCtrl)),
-                     () => RUL_PrenatalCtrl.Execute(Convert.ToInt32(ent.PrenatalCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation)),
-                     () => RUL_DateLastPrenatalCtrl.Execute(Convert.ToDateTime(ent.DateLastPrenatalCtrl),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateFirstTimePrenaCtrl)),
-                     () => RUL_FolicAcidLastPrenaCtrl.Execute(Convert.ToInt32(ent.FolicAcidLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_FerrSulfLastPrenaCtrl.Execute(Convert.ToInt32(ent.FerrSulfLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_CalciumLastPrenaCtrl.Execute(Convert.ToInt32(ent.CalciumLastPrenaCtrl),Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
-                     () => RUL_DateVisualAssessment.Execute(Convert.ToDateTime(ent.DateVisualAssessment),InitialDate,EndDate),
-                     () => RUL_Dateconsultophthalm.Execute(Convert.ToDateTime(ent.DateConsultOphthalm),Convert.ToDateTime(ent.BirthDate),InitialDate,EndDate),
-                     () => RUL_DateDiagMalnutrition.Execute(Convert.ToDateTime(ent.DateDiagMalnutrition),Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDouble(ent.WeightKg),Convert.ToDouble(ent.HeightCm),InitialDate,EndDate),
-                     () => RUL_DateConsuVictimAbuse.Execute(Convert.ToDateTime(ent.DateConsuVictimAbuse),InitialDate,EndDate),
-                     () => RUL_DateConsuVictSexViolence.Execute(Convert.ToDateTime(ent.DateConsuVictSexViolence),InitialDate,EndDate),
-                     () => RUL_DateNutritionConsult.Execute(Convert.ToDateTime(ent.DateNutritionConsult),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_DatePsychologyConsult.Execute(Convert.ToDateTime(ent.DatePsychologyConsult),InitialDate,EndDate),
-                     () => RUL_DateGrowthDev.Execute(Convert.ToDateTime(ent.DateGrowthDev),CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_FerrSulfLastConsuUnderTenY.Execute(Convert.ToInt32(ent.FerrSulfLastConsuUnderTenY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_VitALastConsuUnderTenY.Execute(Convert.ToInt32(ent.VitALastConsuUnderTenY),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateYoungConsuFirstTime.Execute(Convert.ToDateTime(ent.DateYoungConsuFirstTime),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_DateAdultConsuFirstTime.Execute(Convert.ToDateTime(ent.DateAdultConsuFirstTime),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_DateWeight.Execute(ConvertDate(ent.DateWeight),InitialDate,EndDate,Convert.ToDouble(ent.WeightKg.Replace(",", "."))),
+                     () => RUL_WeightKg.Execute(Convert.ToDouble(ent.WeightKg.Replace(",", ".")),ConvertDate(ent.DateWeight)),
+                     () => RUL_DateHeight.Execute(ConvertDate(ent.DateHeight),InitialDate,EndDate,Convert.ToDouble(ent.HeightCm)),
+                     () => RUL_HeightCm.Execute(Convert.ToDouble(ent.HeightCm),ConvertDate(ent.DateHeight)),
+                     () => RUL_DateEstimPartitium.Execute(InitialDate,CutOffDate,ConvertDate(ent.DateEstimPartitium),ConvertDate(ent.BirthDate),ent.IdSex,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateFirstTimePrenaCtrl)),
+                     () => RUL_GestaAgeBorn.Execute(Convert.ToInt32(ent.GestaAgeBorn),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_PPBCG.Execute(Convert.ToInt32(ent.BCG),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_HepatBUnderOneYear.Execute(Convert.ToInt32(ent.HepatBUnderOneYear),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Pentavalent.Execute(Convert.ToInt32(ent.Pentavalent),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Polio.Execute(Convert.ToInt32(ent.Polio),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DPTUnderFiveYears.Execute(Convert.ToInt32(ent.DPTUnderFiveYears),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Rotavirus.Execute(Convert.ToInt32(ent.Rotavirus),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_Pneumococcus.Execute(Convert.ToInt32(ent.Pneumococcus),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_InfluenzaChildren.Execute(Convert.ToInt32(ent.InfluenzaChildren),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_YellowFeverOneY.Execute(Convert.ToInt32(ent.YellowFeverOneY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_HepatitisA.Execute(Convert.ToInt32(ent.HepatitisA),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_TriViralChild.Execute(Convert.ToInt32(ent.TriViralChild),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_PPVPH.Execute(Convert.ToInt32(ent.VPH),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_TDorTTWomFertAge.Execute(Convert.ToInt32(ent.TDorTTWomFertAge),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_BactPlateCtrl.Execute(Convert.ToInt32(ent.BactPlateCtrl),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateAttenPartiCesar.Execute(ConvertDate(ent.DateAttenPartiCesar),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_ExitDateAttenPartiCesar.Execute(ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.ExitDateAttenPartiCesar),ent.IdSex,ConvertDate(ent.DateAttenPartiCesar)),
+                     () => RUL_DateBreastfeeding.Execute(CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateBreastfeeding),InitialDate,ent.IdSex),
+                     () => RUL_DateNewbornCtrl.Execute(InitialDate,CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateNewbornCtrl)),
+                     () => RUL_DateFamiPlanFirstTime.Execute(InitialDate,CutOffDate,ConvertDate(ent.BirthDate),ConvertDate(ent.DateFamiPlanFirstTime)),
+                     () => RUL_SupplyContracMethod.Execute(Convert.ToInt32(ent.SupplyContracMethod),ConvertDate(ent.DateContracDelivery),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateContracDelivery.Execute(ConvertDate(ent.DateContracDelivery),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateFirstTimePrenaCtrl.Execute(ConvertDate(ent.DateFirstTimePrenaCtrl),ent.IdSex,ConvertDate(ent.BirthDate),Convert.ToInt32(ent.Gestation),CutOffDate,ConvertDate(ent.DateLastPrenatalCtrl)),
+                     () => RUL_PrenatalCtrl.Execute(Convert.ToInt32(ent.PrenatalCtrl),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation)),
+                     () => RUL_DateLastPrenatalCtrl.Execute(ConvertDate(ent.DateLastPrenatalCtrl),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,InitialDate,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateFirstTimePrenaCtrl)),
+                     () => RUL_FolicAcidLastPrenaCtrl.Execute(Convert.ToInt32(ent.FolicAcidLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_FerrSulfLastPrenaCtrl.Execute(Convert.ToInt32(ent.FerrSulfLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_CalciumLastPrenaCtrl.Execute(Convert.ToInt32(ent.CalciumLastPrenaCtrl),ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ent.IdSex),
+                     () => RUL_DateVisualAssessment.Execute(ConvertDate(ent.DateVisualAssessment),InitialDate,EndDate),
+                     () => RUL_Dateconsultophthalm.Execute(ConvertDate(ent.DateConsultOphthalm),ConvertDate(ent.BirthDate),InitialDate,EndDate),
+                     () => RUL_DateDiagMalnutrition.Execute(ConvertDate(ent.DateDiagMalnutrition),Convert.ToInt32(ent.ObesCaloProtMalnut),Convert.ToDouble(ent.WeightKg.Replace(",", ".")),Convert.ToDouble(ent.HeightCm),InitialDate,EndDate),
+                     () => RUL_DateConsuVictimAbuse.Execute(ConvertDate(ent.DateConsuVictimAbuse),InitialDate,EndDate),
+                     () => RUL_DateConsuVictSexViolence.Execute(ConvertDate(ent.DateConsuVictSexViolence),InitialDate,EndDate),
+                     () => RUL_DateNutritionConsult.Execute(ConvertDate(ent.DateNutritionConsult),InitialDate,CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_DatePsychologyConsult.Execute(ConvertDate(ent.DatePsychologyConsult),InitialDate,EndDate),
+                     () => RUL_DateGrowthDev.Execute(ConvertDate(ent.DateGrowthDev),CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_FerrSulfLastConsuUnderTenY.Execute(Convert.ToInt32(ent.FerrSulfLastConsuUnderTenY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_VitALastConsuUnderTenY.Execute(Convert.ToInt32(ent.VitALastConsuUnderTenY),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateYoungConsuFirstTime.Execute(ConvertDate(ent.DateYoungConsuFirstTime),InitialDate,CutOffDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_DateAdultConsuFirstTime.Execute(ConvertDate(ent.DateAdultConsuFirstTime),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_CondomDelivPatientITS.Execute(Convert.ToInt32(ent.CondomDelivPatientITS)),
-                     () => RUL_DatePreTestElisaVIH.Execute(Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToDateTime(ent.DatePostTestElisaVIH),Convert.ToDateTime(ent.DateElisaTakingVIH)),
-                     () => RUL_DatePostTestElisaVIH.Execute(Convert.ToDateTime(ent.DatePostTestElisaVIH),Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.BirthDate),CutOffDate,InitialDate,Convert.ToDateTime(ent.DateElisaTakingVIH)),
+                     () => RUL_DatePreTestElisaVIH.Execute(ConvertDate(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.BirthDate),CutOffDate,InitialDate,ConvertDate(ent.DatePostTestElisaVIH),ConvertDate(ent.DateElisaTakingVIH)),
+                     () => RUL_DatePostTestElisaVIH.Execute(ConvertDate(ent.DatePostTestElisaVIH),ConvertDate(ent.DatePreTestElisaVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.BirthDate),CutOffDate,InitialDate,ConvertDate(ent.DateElisaTakingVIH)),
                      () => RUL_AttentMentalIllness.Execute(Convert.ToInt32(ent.AttentMentalIllness),Convert.ToInt32(ent.DiagMentalIllness)),
-                     () => RUL_DateHepatitisBPregnant.Execute(Convert.ToDateTime(ent.DateHepatitisBPregnant),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.ResultHepatitisBPregnant)),
-                     () => RUL_ResultHepatitisBPregnant.Execute(Convert.ToInt32(ent.ResultHepatitisBPregnant),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),Convert.ToDateTime(ent.DateHepatitisBPregnant)),
-                     () => RUL_DateSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),Convert.ToDateTime(ent.DateSerologySyphilis)),
-                     () => RUL_ResultSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),Convert.ToDateTime(ent.DateSerologySyphilis)),
-                     () => RUL_DateElisaTakingVIH.Execute(Convert.ToDateTime(ent.DateElisaTakingVIH),Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.DatePreTestElisaVIH),Convert.ToDateTime(ent.DatePostTestElisaVIH),CutOffDate,InitialDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultElisaVIH.Execute(Convert.ToInt32(ent.ResultElisaVIH),Convert.ToDateTime(ent.DateElisaTakingVIH)),
-                     () => RUL_DateNeonatalTSH.Execute(Convert.ToDateTime(ent.DateNeonatalTSH),InitialDate,CutOffDate,Convert.ToDateTime(ent.BirthDate),Convert.ToInt32(ent.ResultNeonatalTSH)),
-                     () => RUL_ResultNeonatalTSH.Execute(Convert.ToInt32(ent.ResultNeonatalTSH),Convert.ToDateTime(ent.DateNeonatalTSH)),
-                     () => RUL_CervicalCancerScreening.Execute(Convert.ToInt32(ent.CervicalCancerScreening),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateCervicalCytology.Execute(Convert.ToDateTime(ent.DateCervicalCytology),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalCytology),InitialDate),
-                     () => RUL_ResultCervicalCytology.Execute(Convert.ToInt32(ent.ResultCervicalCytology),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateCervicalCytology)),
-                     () => RUL_QualityCytologySample.Execute(Convert.ToInt32(ent.QualityCytologySample),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalCytology)),
-                     () => RUL_HabilitationCodeCytology.Execute(ent.HabilitationCodeCytology,ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.QualityCytologySample)),
-                     () => RUL_DateColposcopy.Execute(Convert.ToDateTime(ent.DateColposcopy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,InitialDate),
-                     () => RUL_HabilitationCodeColposcopy.Execute(ent.HabilitationCodeColposcopy,ent.IdSex,Convert.ToDateTime(ent.DateColposcopy),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateCervicalBiopsy.Execute(Convert.ToDateTime(ent.DateCervicalBiopsy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalBiopsy),InitialDate),
-                     () => RUL_ResultCervicalBiopsy.Execute(Convert.ToInt32(ent.ResultCervicalBiopsy),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToDateTime(ent.DateCervicalBiopsy)),
-                     () => RUL_HabilitationCodeBiopsy.Execute(ent.HabilitationCodeBiopsy,ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalBiopsy)),
-                     () => RUL_DateMammography.Execute(Convert.ToDateTime(ent.DateMammography),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography),InitialDate),
-                     () => RUL_ResultMammography.Execute(Convert.ToInt32(ent.ResultMammography),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateMammography)),
-                     () => RUL_HabilitationCodeMammography.Execute(ent.HabilitationCodeMammography,ent.IdSex,Convert.ToInt32(ent.ResultMammography),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateBreastBiopsyBACAF.Execute(Convert.ToDateTime(ent.DateBreastBiopsyBACAF),Convert.ToDateTime(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography)),
-                     () => RUL_DateResultBreastBiopsy.Execute(Convert.ToDateTime(ent.DateResultBreastBiopsy),CutOffDate,Convert.ToDateTime(ent.BirthDate),ent.IdSex,Convert.ToDateTime(ent.DateBreastBiopsyBACAF)),
-                     () => RUL_ResultBiopsyBreast.Execute(Convert.ToInt32(ent.ResultBiopsyBreast),ent.IdSex,Convert.ToDateTime(ent.BirthDate),CutOffDate,Convert.ToDateTime(ent.DateResultBreastBiopsy)),
-                     () => RUL_HabiliationCodeBiopsyBreast.Execute(ent.HabiliationCodeBiopsyBreast,ent.IdSex,Convert.ToInt32(ent.ResultBiopsyBreast),Convert.ToDateTime(ent.BirthDate),CutOffDate),
-                     () => RUL_DateHemoglobin.Execute(Convert.ToDateTime(ent.DateHemoglobin),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
+                     () => RUL_DateHepatitisBPregnant.Execute(ConvertDate(ent.DateHepatitisBPregnant),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.ResultHepatitisBPregnant)),
+                     () => RUL_ResultHepatitisBPregnant.Execute(Convert.ToInt32(ent.ResultHepatitisBPregnant),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.Gestation),ConvertDate(ent.DateHepatitisBPregnant)),
+                     () => RUL_DateSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),ConvertDate(ent.DateSerologySyphilis)),
+                     () => RUL_ResultSerologySyphilis.Execute(Convert.ToInt32(ent.ResultSerologySyphilis),ConvertDate(ent.DateSerologySyphilis)),
+                     () => RUL_DateElisaTakingVIH.Execute(ConvertDate(ent.DateElisaTakingVIH),Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.DatePreTestElisaVIH),ConvertDate(ent.DatePostTestElisaVIH),CutOffDate,InitialDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultElisaVIH.Execute(Convert.ToInt32(ent.ResultElisaVIH),ConvertDate(ent.DateElisaTakingVIH)),
+                     () => RUL_DateNeonatalTSH.Execute(ConvertDate(ent.DateNeonatalTSH),InitialDate,CutOffDate,ConvertDate(ent.BirthDate),Convert.ToInt32(ent.ResultNeonatalTSH)),
+                     () => RUL_ResultNeonatalTSH.Execute(Convert.ToInt32(ent.ResultNeonatalTSH),ConvertDate(ent.DateNeonatalTSH)),
+                     () => RUL_CervicalCancerScreening.Execute(Convert.ToInt32(ent.CervicalCancerScreening),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateCervicalCytology.Execute(ConvertDate(ent.DateCervicalCytology),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalCytology),InitialDate),
+                     () => RUL_ResultCervicalCytology.Execute(Convert.ToInt32(ent.ResultCervicalCytology),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateCervicalCytology)),
+                     () => RUL_QualityCytologySample.Execute(Convert.ToInt32(ent.QualityCytologySample),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalCytology)),
+                     () => RUL_HabilitationCodeCytology.Execute(ent.HabilitationCodeCytology,ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.QualityCytologySample)),
+                     () => RUL_DateColposcopy.Execute(ConvertDate(ent.DateColposcopy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,InitialDate),
+                     () => RUL_HabilitationCodeColposcopy.Execute(ent.HabilitationCodeColposcopy,ent.IdSex,ConvertDate(ent.DateColposcopy),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateCervicalBiopsy.Execute(ConvertDate(ent.DateCervicalBiopsy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultCervicalBiopsy),InitialDate),
+                     () => RUL_ResultCervicalBiopsy.Execute(Convert.ToInt32(ent.ResultCervicalBiopsy),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,ConvertDate(ent.DateCervicalBiopsy)),
+                     () => RUL_HabilitationCodeBiopsy.Execute(ent.HabilitationCodeBiopsy,ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,Convert.ToInt32(ent.ResultCervicalBiopsy)),
+                     () => RUL_DateMammography.Execute(ConvertDate(ent.DateMammography),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography),InitialDate),
+                     () => RUL_ResultMammography.Execute(Convert.ToInt32(ent.ResultMammography),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateMammography)),
+                     () => RUL_HabilitationCodeMammography.Execute(ent.HabilitationCodeMammography,ent.IdSex,Convert.ToInt32(ent.ResultMammography),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateBreastBiopsyBACAF.Execute(ConvertDate(ent.DateBreastBiopsyBACAF),ConvertDate(ent.BirthDate),CutOffDate,ent.IdSex,Convert.ToInt32(ent.ResultMammography)),
+                     () => RUL_DateResultBreastBiopsy.Execute(ConvertDate(ent.DateResultBreastBiopsy),CutOffDate,ConvertDate(ent.BirthDate),ent.IdSex,ConvertDate(ent.DateBreastBiopsyBACAF)),
+                     () => RUL_ResultBiopsyBreast.Execute(Convert.ToInt32(ent.ResultBiopsyBreast),ent.IdSex,ConvertDate(ent.BirthDate),CutOffDate,ConvertDate(ent.DateResultBreastBiopsy)),
+                     () => RUL_HabiliationCodeBiopsyBreast.Execute(ent.HabiliationCodeBiopsyBreast,ent.IdSex,Convert.ToInt32(ent.ResultBiopsyBreast),ConvertDate(ent.BirthDate),CutOffDate),
+                     () => RUL_DateHemoglobin.Execute(ConvertDate(ent.DateHemoglobin),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
                      () => RUL_ResultHemoglobin.Execute(Convert.ToDouble(ent.ResultHemoglobin)),
-                     () => RUL_DateGlycemia.Execute(Convert.ToDateTime(ent.DateGlycemia)),
-                     () => RUL_DateCreatinine.Execute(Convert.ToDateTime(ent.DateCreatinine),Convert.ToDouble(ent.ResultCreatinine),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultCreatinine.Execute(Convert.ToDouble(ent.ResultCreatinine),Convert.ToDateTime(ent.DateCreatinine)),
-                     () => RUL_DateGlycosylatedHemoglobin.Execute(Convert.ToDateTime(ent.DateGlycosylatedHemoglobin),Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),InitialDate,EndDate,Convert.ToDateTime(ent.BirthDate)),
-                     () => RUL_ResultGlycosylatedHemoglobin.Execute(Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),Convert.ToDateTime(ent.DateGlycosylatedHemoglobin)),
-                     () => RUL_DateMicroalbuminuria.Execute(Convert.ToDateTime(ent.DateMicroalbuminuria)),
-                     () => RUL_DateHDL.Execute(Convert.ToDateTime(ent.DateHDL)),
-                     () => RUL_DateBacilloscopy.Execute(Convert.ToDateTime(ent.DateBacilloscopy),Convert.ToInt32(ent.ResultBacilloscopy)),
-                     () => RUL_ResultBacilloscopy.Execute(Convert.ToInt32(ent.ResultBacilloscopy),Convert.ToDateTime(ent.DateBacilloscopy)),
+                     () => RUL_DateGlycemia.Execute(ConvertDate(ent.DateGlycemia)),
+                     () => RUL_DateCreatinine.Execute(ConvertDate(ent.DateCreatinine),Convert.ToDouble(ent.ResultCreatinine),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultCreatinine.Execute(Convert.ToDouble(ent.ResultCreatinine),ConvertDate(ent.DateCreatinine)),
+                     () => RUL_DateGlycosylatedHemoglobin.Execute(ConvertDate(ent.DateGlycosylatedHemoglobin),Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),InitialDate,EndDate,ConvertDate(ent.BirthDate)),
+                     () => RUL_ResultGlycosylatedHemoglobin.Execute(Convert.ToDouble(ent.ResultGlycosylatedHemoglobin),ConvertDate(ent.DateGlycosylatedHemoglobin)),
+                     () => RUL_DateMicroalbuminuria.Execute(ConvertDate(ent.DateMicroalbuminuria)),
+                     () => RUL_DateHDL.Execute(ConvertDate(ent.DateHDL)),
+                     () => RUL_DateBacilloscopy.Execute(ConvertDate(ent.DateBacilloscopy),Convert.ToInt32(ent.ResultBacilloscopy)),
+                     () => RUL_ResultBacilloscopy.Execute(Convert.ToInt32(ent.ResultBacilloscopy),ConvertDate(ent.DateBacilloscopy)),
                      () => RUL_TreatmentCongenitalHypothyroidism.Execute(Convert.ToInt32(ent.CongeHypothyroidism),Convert.ToInt32(ent.TreatmentCongenitalHypothyroidism)),
-                     () => RUL_TreatmentGestationalSyphilis.Execute(Convert.ToInt32(ent.TreatmentGestationalSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.GestaCongeSyphilis),Convert.ToDateTime(ent.BirthDate),CutOffDate),
+                     () => RUL_TreatmentGestationalSyphilis.Execute(Convert.ToInt32(ent.TreatmentGestationalSyphilis),ent.IdSex,Convert.ToInt32(ent.Gestation),Convert.ToInt32(ent.GestaCongeSyphilis),ConvertDate(ent.BirthDate),CutOffDate),
                      () => RUL_TreatmentCongenitalSyphilis.Execute(Convert.ToInt32(ent.TreatmentCongenitalSyphilis),Convert.ToInt32(ent.GestaCongeSyphilis)),
                      () => RUL_TreatmentLeprosy.Execute(Convert.ToInt32(ent.Leprosy),Convert.ToInt32(ent.TreatmentLeprosy)),
-                     () => RUL_EndDateTreatmentLeishmaniasis.Execute(Convert.ToDateTime(ent.EndDateTreatmentLeishmaniasis),InitialDate,EndDate)
+                     () => RUL_EndDateTreatmentLeishmaniasis.Execute(ConvertDate(ent.EndDateTreatmentLeishmaniasis),InitialDate,EndDate)
                  });
 
                 //Recorre los registros para insertar en la lista de errores 
@@ -980,7 +994,7 @@ namespace OpheliaSuiteV2.BRMRuntime
                 {
                     if (fields != "" && fields != " ")
                     {
-                        string mensajeItem = $"Fila {index}";
+                        string mensajeItem = $"Fila {index + 1}";
                         listErrors.Add(string.Concat(mensajeItem, "|", fields.Trim()));
                     }
                 }
@@ -22398,6 +22412,8 @@ namespace OpheliaSuiteV2.BRMRuntime
     /// </sumary>
     public static class Helper
     {
+        #region Members
+        #endregion
         /// <sumary>
         /// Calcula la edad
         /// </sumary> 
@@ -22441,6 +22457,76 @@ namespace OpheliaSuiteV2.BRMRuntime
             return result;
 
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web
+        /// </sumary> 
+        /// <param name="method">Método del servicio</param>
+        /// <param name="url">Url del servicio web</param>
+        /// <param name="parameters">Parámetros del método a consumir</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        /// <param name="fileFullPath">fileFullPath</param>
+        /// <param name="minTimeout">Minutos de timeout</param>
+        public static ENT_ActionResult SYS_WSRequest(string method, string url, object parameters, dynamic headers, string fileFullPath, double? minTimeout)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(url))
+                {
+                    throw new ArgumentNullException("method or url");
+                }
+
+                HttpMethod httpMethod = new HttpMethod(method);
+                double min = minTimeout != null && minTimeout > 0 ? (double)minTimeout : 3;
+                using (HttpClient Client = new HttpClient { Timeout = TimeSpan.FromMinutes(min) })
+                {
+                    using (var request = new HttpRequestMessage(httpMethod, url))
+                    {
+                        if (parameters != null)
+                        {
+                            request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
+                        }
+
+                        if (headers != null)
+                        {
+                            foreach (KeyValuePair<String, String> header in headers)
+                            {
+                                request.Headers.Add(header.Key, header.Value);
+                            }
+                        }
+
+                        using (HttpResponseMessage response = Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result)
+                        {
+                            using (HttpContent content = response.Content)
+                            {
+                                string result = content.ReadAsStringAsync().Result;
+
+                                if (response.StatusCode == HttpStatusCode.OK)
+                                {
+                                    var resultWs = JsonConvert.DeserializeObject<dynamic>(result);
+                                    if ((bool)resultWs.IsError)
+                                    {
+                                        return new ENT_ActionResult() { IsError = true, ErrorMessage = resultWs.ErrorMessage };
+                                    }
+                                    return new ENT_ActionResult() { IsSuccessful = resultWs.IsSucessfull, Result = resultWs.Result };
+
+                                }
+
+                                else
+                                    return new ENT_ActionResult() { IsError = true, ErrorMessage = result };
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.InnerException.Message + ex.StackTrace };
+            }
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Obtiene un archivo del repositorio de archivos según el tipo
         /// </sumary> 
@@ -22459,7 +22545,7 @@ namespace OpheliaSuiteV2.BRMRuntime
                 ENT_ActionResult result = new ENT_ActionResult();
                 string url = "http://davincilb.ophelia.co:8080/api/api/Upload/GetDocument";
                 url = url + "?company=" + company + "&libraryId=" + libraryId + "&fileId=" + fileId;
-                result = SYS_WSGET(url, null);
+                result = Helper.SYS_WSGET(url, null);
                 return result;
             }
             catch (Exception ex)
@@ -22467,6 +22553,80 @@ namespace OpheliaSuiteV2.BRMRuntime
                 return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web GET
+        /// </sumary> 
+        /// <param name="url">Url del servicio Web</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        public static ENT_ActionResult SYS_WSGET(string url, dynamic headers)
+        {
+            ENT_ActionResult result = new ENT_ActionResult();
+            result = Helper.SYS_WSRequest("GET", url, null, headers, null, null);
+            return result;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="remoteFile">Ruta destino de archivo a subir</param>
+        /// <param name="localFile">FileStream de archivo a subir</param>
+        public static string USR_FtpUpload(string remoteFile, dynamic localFile)
+        {
+            try
+            {
+                string ftp = "davincilb.ophelia.co";
+                string userName = "OpheliaDcom";
+                string password = "iCNw7vyq6O";
+
+                string host = ("ftp://" + ftp);
+
+                if (string.IsNullOrEmpty(ftp) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                {
+                    throw new ArgumentNullException("ftp,userName,password");
+                }
+                int bufferSize = 2048;
+                /* Create an FTP Request */
+                FtpWebRequest ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
+                /* Log in to the FTP Server with the User Name and Password Provided */
+                ftpRequest.Credentials = new NetworkCredential(userName, password);
+                /* When in doubt, use these options */
+                ftpRequest.UseBinary = true;
+                ftpRequest.UsePassive = true;
+                ftpRequest.KeepAlive = true;
+                /* Specify the Type of FTP Request */
+                ftpRequest.Method = WebRequestMethods.Ftp.UploadFile;
+                /* Establish Return Communication with the FTP Server */
+                Stream ftpStream = ftpRequest.GetRequestStream();
+                /* Buffer for the Downloaded Data */
+                localFile.Position = 0;
+                byte[] byteBuffer = new byte[bufferSize];
+                int bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
+                /* Upload the File by Sending the Buffered Data Until the Transfer is Complete */
+                while (bytesSent != 0)
+                {
+                    ftpStream.Write(byteBuffer, 0, bytesSent);
+                    bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
+                }
+
+                /* Resource Cleanup */
+                localFile.Close();
+                ftpStream.Close();
+                using (FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse())
+                {
+                    ftpRequest = null;
+                    return response.StatusDescription;
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Adjunta el archivo al proceso
         /// </sumary> 
@@ -22490,7 +22650,7 @@ namespace OpheliaSuiteV2.BRMRuntime
                 remotePath += $"/{fileName}";
                 using (FileStream fs = new FileStream(fileFullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
-                    var r = USR_FtpUpload(remotePath, fs);
+                    var r = Helper.USR_FtpUpload(remotePath, fs);
                     fs.Close();
                 }
 
@@ -22501,6 +22661,23 @@ namespace OpheliaSuiteV2.BRMRuntime
                 return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Función estándar para el consumo de un servicio web POST
+        /// </sumary> 
+        /// <param name="url">Url del Servicio Web</param>
+        /// <param name="parameters">Parámetros del servicio</param>
+        /// <param name="headers">Cabecera del servicio</param>
+        /// <param name="fileFullPath">fileFullPath</param>
+        public static ENT_ActionResult SYS_WSPOST(string url, object parameters, dynamic headers, string fileFullPath)
+        {
+            ENT_ActionResult result = new ENT_ActionResult();
+            result = Helper.SYS_WSRequest("POST", url, parameters, headers, fileFullPath, null);
+            return result;
+        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar campos vacios
         /// </sumary> 
@@ -22509,6 +22686,8 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             return String.IsNullOrEmpty(PE_Value) ? "PE_Empty" : PE_Value;
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar Fecha dentro de un ranfo de fechas
         /// </sumary> 
@@ -22520,6 +22699,8 @@ namespace OpheliaSuiteV2.BRMRuntime
             return Date >= InitDate && Date <= EndDate;
 
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función para validar el tipo de fecha
         /// </sumary> 
@@ -22528,6 +22709,8 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             return DateTime.TryParse(EsFecha, out DateTime _);
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Función que valida los caracteres especiales en una cadena de texto
         /// </sumary> 
@@ -22538,6 +22721,8 @@ namespace OpheliaSuiteV2.BRMRuntime
 
             return pattern.IsMatch(text);
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22572,6 +22757,8 @@ namespace OpheliaSuiteV2.BRMRuntime
             };
             return true;
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22587,7 +22774,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         {
             try
             {
-                var result = USR_WSGetFile(company, libraryId, fileId);
+                var result = Helper.USR_WSGetFile(company, libraryId, fileId);
 
                 Type typeEntity = (Type)entity;
                 Type genericListType = typeof(List<>).MakeGenericType(typeEntity);
@@ -22600,7 +22787,7 @@ namespace OpheliaSuiteV2.BRMRuntime
 
                     if (fileBody != null && fileBody.Length > 0)
                     {
-                        if (!USR_ValidateFileName4505(listErrors, (string)((JValue)((dynamic)result.Result).FileName).Value))
+                        if (!Helper.USR_ValidateFileName4505(listErrors, (string)((JValue)((dynamic)result.Result).FileName).Value))
                         {
                             listErrors.Add($"El Nombre del archivo no es valido, no cumple con la estructura especificada {result.FileName}");
                             return lstEntities;
@@ -22668,7 +22855,7 @@ namespace OpheliaSuiteV2.BRMRuntime
 
                                 if (listErrors.Count == 0)
                                 {
-                                    lstEntities = SYS_FileToEntities(text1, lineSeparator, columnSeparator, entity);
+                                    lstEntities = Helper.SYS_FileToEntities(text1, lineSeparator, columnSeparator, entity);
                                     listErrors.AddRange(listErrorsAdd);
 
                                     int index = 0;
@@ -22687,6 +22874,9 @@ namespace OpheliaSuiteV2.BRMRuntime
                                         {
                                             dic.Add($"{ent.IdentificationType}_{ent.DocumentNumber}", ent.DocumentNumber);
                                         }
+                                        List<dynamic> listValidate = new List<dynamic>();
+                                        listValidate.Add(new { msjfinal = "" });
+                                        listValidate.Clear();
                                         //Ingresa las validacion de las expresiones regulares
                                         if (ent.ValidationErrorsList?.Count > 0)
                                         {
@@ -22698,7 +22888,14 @@ namespace OpheliaSuiteV2.BRMRuntime
                                                             .Single(pro => Regex.IsMatch(msg, string.Format(@"\b{0}\b", Regex.Escape(pro.Value.Name))));
                                                 string msgError = ((RegexAttribute)p.Value.GetCustomAttribute(typeof(RegexAttribute)))?.Message;
 
-                                                listErrors.Add(string.Concat(mensajeItem, columnSeparator, msgError.Trim().Replace("-", "|").Replace(" - ", "|")));
+                                                string msjFinaly = string.Concat(mensajeItem, columnSeparator, msgError.Trim().Replace("-", "|").Replace(" - ", "|"));
+
+                                                if (listValidate.FirstOrDefault(x => x.msjfinal == msjFinaly) == null)
+                                                {
+                                                    listValidate.Add(new { msjfinal = msjFinaly });
+                                                    listErrors.Add(msjFinaly);
+                                                }
+
                                             }
                                         }
                                         ++index;
@@ -22737,6 +22934,8 @@ namespace OpheliaSuiteV2.BRMRuntime
                 throw;
             }
         }
+        #region Members
+        #endregion
         /// <sumary>
         /// Plantilla de Función vacía
         /// </sumary> 
@@ -22792,816 +22991,72 @@ namespace OpheliaSuiteV2.BRMRuntime
 
             return listError.Count == 0;
         }
+        #region Members
+        #endregion
         /// <sumary>
-        /// Plantilla de Función vacía
+        /// Valida si el nombre de una resolución es valido
         /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="_entity">_entity</param>
-        /// <param name="listErrors">listErrors</param>
-        /// <param name="index">index</param>
-        /// <param name="listDocumentTypesDB">listDocumentTypesDB</param>
-        /// <param name="IdTypePopulation">IdTypePopulation</param>
-        public static long USR_ValidateDocumentNumber4505(long adapterId, List<ENT_StructureRes4505En> _entity, List<string> listErrors, long index, List<dynamic> listDocumentTypesDB, long IdTypePopulation)
+        /// <param name="codeEPSlength">longitud del codigo de la EPS</param>
+        /// <param name="resolutionCode">Codigo de la Resolucion</param>
+        /// <param name="listError">Lista de errores</param>
+        /// <param name="fileName">Nombre del archivo a validar</param>
+        public static bool USR_ValidateFileName(long codeEPSlength, string resolutionCode, List<string> listError, string fileName)
         {
-            index = 1;
-            //Funcion valida si el usuario existe
-            List<dynamic> personList = new List<dynamic>();
-            var listErrorsDocumentNumber = new List<string>();
-            Dictionary<string, ENT_StructureRes4505En> _dictionary4505 = new Dictionary<string, ENT_StructureRes4505En>();
-            Dictionary<string, string> _dictionaryDocumentType = new Dictionary<string, string>();
-            _dictionaryDocumentType.Add("TI", "3");
-            _dictionaryDocumentType.Add("CC", "1");
-            _dictionaryDocumentType.Add("CE", "6");
-            _dictionaryDocumentType.Add("PA", "7");
-            _dictionaryDocumentType.Add("RC", "2");
-            _dictionaryDocumentType.Add("SC", "4");
-            _dictionaryDocumentType.Add("CD", "9");
-            _dictionaryDocumentType.Add("NV", "1423");
-            _dictionaryDocumentType.Add("MS", "1424");
-            _dictionaryDocumentType.Add("AS", "2825");
-            _dictionaryDocumentType.Add("UN", "3271");
-
-            foreach (ENT_StructureRes4505En file in _entity)
+            if (listError == null)
             {
-                if (!_dictionary4505.ContainsKey($"{file.IdentificationType}_{file.DocumentNumber}"))
-                    _dictionary4505.Add($"{file.IdentificationType}_{file.DocumentNumber}", file);
-
-                if (_dictionaryDocumentType.ContainsKey(file.IdentificationType))
-                {
-                    var documentTypeDictionary = _dictionaryDocumentType[file.IdentificationType];
-
-                    var documentTypeBD = listDocumentTypesDB.Where(d => d.Id == documentTypeDictionary).FirstOrDefault();
-                    // Agrega personas para consultarlas posteriormente
-                    personList.Add(new { DocumentType = documentTypeBD.Id.ToString(), Identification = file.DocumentNumber, Index = index, typeId = file.IdentificationType });
-                }
-                index++;
+                listError = new List<string>();
             }
-            List<dynamic> listpersonByPopulation = new List<dynamic>();
-            USR_ValidateAffiliatePersonResolutions(personList, adapterId, listErrorsDocumentNumber, listpersonByPopulation, IdTypePopulation, _entity, _dictionaryDocumentType);
-            var newlist = listErrorsDocumentNumber.Select(x => x.Replace("item", "Fila")).ToList();
+
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                listError.Add("El nombre del Archivo no es Valido");
+                return listError.Count == 0;
+            }
+
+            if (!System.IO.Path.GetExtension(fileName).Equals(".txt"))
+            {
+                listError.Add("La extension del archivo no es valida");
+                return listError.Count == 0;
+            }
 
 
-            listErrors.AddRange(newlist);
-            return index;
+            string[] fileNameArreay = fileName.Split('_');
+
+            if (fileNameArreay.Length != 3)
+            {
+                listError.Add("El nombre del archivo no es Valido");
+                return listError.Count == 0;
+            }
+
+            var yyyymmdd = new Regex(@"^(?:(?:(?:(?:(?:[13579][26]|[2468][048])00)|(?:[0-9]{2}(?:(?:[13579][26])|(?:[2468][048]|0[48]))))(?:(?:(?:09|04|06|11)(?:0[1-9]|1[0-9]|2[0-9]|30))|(?:(?:01|03|05|07|08|10|12)(?:0[1-9]|1[0-9]|2[0-9]|3[01]))|(?:02(?:0[1-9]|1[0-9]|2[0-9]))))|(?:[0-9]{4}(?:(?:(?:09|04|06|11)(?:0[1-9]|1[0-9]|2[0-9]|30))|(?:(?:01|03|05|07|08|10|12)(?:0[1-9]|1[0-9]|2[0-9]|3[01]))|(?:02(?:[01][0-9]|2[0-8])))))$");
+
+            if (!yyyymmdd.IsMatch(fileNameArreay[0]))
+            {
+                listError.Add("La fecha en el nombre del Archivo no es valida (verifique el formato)");
+                return listError.Count == 0;
+            }
+
+            bool fecha = DateTime.TryParseExact(fileNameArreay[0], "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out DateTime dateTime);
+
+            if (!fecha)
+            {
+                listError.Add("La fecha en el nombre del Archivo no es valida");
+            }
+
+            if (fileNameArreay[1].Length != codeEPSlength && fileNameArreay[1].Length != 5)
+            {
+                listError.Add($"Codigo de EPS {fileNameArreay[1].Length} | {codeEPSlength}");
+            }
+
+            if (!fileNameArreay[2].Replace(".txt", "").Trim().Equals(resolutionCode))
+            {
+                listError.Add("El nombre del archivo no es valido");
+            }
+
+            return listError.Count == 0;
         }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="personList">personList</param>
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="listErrors">listErrors</param>
-        /// <param name="listpersonByPopulation">listpersonByPopulation</param>
-        /// <param name="IdTypePopulation">IdTypePopulation</param>
-        /// <param name="_entity">_entity</param>
-        /// <param name="_dictionaryDocumentType">_dictionaryDocumentType</param>
-        public static List<string> USR_ValidateAffiliatePersonResolutions(List<dynamic> personList, long adapterId, List<string> listErrors, List<dynamic> listpersonByPopulation, long IdTypePopulation, List<ENT_StructureRes4505En> _entity, dynamic _dictionaryDocumentType)
-        {
-            //Consulta en la tabla person
-            ENT_ActionResult persons = USR_GetPersonByDocumentNumber(adapterId, personList);
-            if (persons.IsError) throw new Exception(persons.ErrorMessage);
-            List<dynamic> listpersonByDocumentNumber = JsonConvert.DeserializeObject<List<dynamic>>(persons.Result.ToString());
-            Dictionary<string, dynamic> dictionarypersonByDocumentNumber = listpersonByDocumentNumber.ToDictionary(x => $"{x.IdDocumentType}_{x.DocumentNumber}", x => x);
-
-            //Valida tipo de poblacion
-            var res = (from p in listpersonByDocumentNumber select p.Id).ToList();
-            listpersonByPopulation.Add(res);
-            ENT_ActionResult personsPopulation = USR_GetPersonByTypePopulation(adapterId, listpersonByPopulation);
-            if (personsPopulation.IsError) throw new Exception(persons.ErrorMessage);
-            List<ENT_Person4505> listpersonBypersonsPopulation = JsonConvert.DeserializeObject<List<ENT_Person4505>>(personsPopulation.Result.ToString());
-
-            int index = 1;
-            foreach (var ent in _entity)
-            {
-                var documentTypeDictionary = _dictionaryDocumentType[ent.IdentificationType];
-
-                if (listpersonBypersonsPopulation.Exists(f => f.IdDocumentType == documentTypeDictionary && f.DocumentNumber == ent.DocumentNumber))
-                {
-                    if (listpersonBypersonsPopulation.Exists(f => f.DocumentNumber == ent.DocumentNumber && f.IdTypePopulation != IdTypePopulation.ToString()))
-                        listErrors.Add(string.Concat($"Fila {index}", "|El tipo de afiliado en el archivo no corresponde al tipo de afiliado seleccionado en la plantilla ", $" numero {ent.DocumentNumber}"));
-                }
-                index++;
-            }
-
-            List<dynamic> personsNoExist = new List<dynamic>();
-
-            foreach (var person in personList)
-            {
-                if (!dictionarypersonByDocumentNumber.ContainsKey($"{person.DocumentType}_{person.Identification}"))
-                {
-                    personsNoExist.Add(person);
-
-                }
-            }
-            if (personsNoExist.Count > 0)
-            {
-
-                ENT_ActionResult novelty = USR_GetNoveltyDetail(adapterId, personsNoExist);
-                if (novelty.IsError)
-                {
-                    throw new Exception(novelty.ErrorMessage);
-                }
-                List<dynamic> novChangeNumDoc = JsonConvert.DeserializeObject<List<dynamic>>(novelty.Result.ToString());
-                if (novChangeNumDoc.Count > 0)
-                {
-                    foreach (var itemNoveltyDetail in novChangeNumDoc)
-                    {
-                        var novelties = USR_GetNoveltiesTypeDocumentByPerson(adapterId, itemNoveltyDetail.IdNovelty.ToString());
-                        if (novelties.IsError)
-                        {
-                            throw new Exception(novelties.ErrorMessage);
-                        }
-                        List<dynamic> listNovelties = JsonConvert.DeserializeObject<List<dynamic>>(novelties.Result.ToString());
-                        foreach (var itemNovelty in listNovelties)
-                        {
-                            var person = USR_GetPersonByTypeAndDocumentNumber(adapterId, itemNovelty.NewValue.ToString(), itemNoveltyDetail.NewValue.ToString());
-                            if (person.IsError)
-                            {
-                                throw new Exception(person.ErrorMessage);
-                            }
-                            List<dynamic> personBD = JsonConvert.DeserializeObject<List<dynamic>>(person.Result.ToString());
-                            if (personBD != null && personBD.Count > 0)
-                            {
-                                personsNoExist.RemoveAll(d => d.Identification == itemNoveltyDetail.OldValue.ToString());
-                                break;
-                            }
-                        }
-                    }
-
-                }
-                //Valida cambio de tipo de documento       
-
-                var novelties2 = USR_GetNoveltiesAffiliate(adapterId, personsNoExist);
-                if (novelties2.IsError)
-                {
-                    throw new Exception(novelties2.ErrorMessage);
-                }
-                List<dynamic> listNovelties2 = JsonConvert.DeserializeObject<List<dynamic>>(novelties2.Result.ToString());
-                Dictionary<string, dynamic> dictionaryNovelties2 = listNovelties2.ToDictionary(x => $"{x.OldValue}_{x.DocumentNumber}", x => x);
-                List<Tuple<int, string>> ForDelete = new List<Tuple<int, string>>();
-
-                foreach (var itemPerson in personsNoExist)
-                {
-                    if (dictionaryNovelties2.ContainsKey($"{itemPerson.DocumentType}_{itemPerson.Identification}"))
-                    {
-                        Tuple<int, string> tuple = new Tuple<int, string>(int.Parse(itemPerson.DocumentType), itemPerson.Identification);
-
-                        ForDelete.Add(tuple);
-                    }
-                }
-
-                foreach (var item in ForDelete)
-                {
-                    personsNoExist.RemoveAll(d => d.Identification == item.Item2);
-                }
-
-                foreach (var item in personsNoExist)
-                {
-                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification} registrada el|no existe");
-                }
-            }
-
-            return listErrors;
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="sourceList">sourceList</param>
-        /// <param name="maxSubItems">maxSubItems</param>
-        public static dynamic USR_SplitList4505(List<ENT_StructureRes4505En> sourceList, long maxSubItems)
-        {
-            return sourceList
-                .Select((x, i) => new { Index = i, Value = x })
-                .GroupBy(x => x.Index / maxSubItems)
-                .Select(x => x.Select(v => v.Value).ToList())
-                .ToList();
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="fileName">fileName</param>
-        /// <param name="cutOffDate">cutOffDate</param>
-        /// <param name="code">code</param>
-        /// <param name="idOperator">idOperator</param>
-        /// <param name="caseNumber">caseNumber</param>
-        /// <param name="initialDate">initialDate</param>
-        /// <param name="endDate">endDate</param>
-        /// <param name="idPopulation">idPopulation</param>
-        /// <param name="listFileEntity">listFileEntity</param>
-        public static ENT_ActionResult USR_Save4505File(string fileName, string cutOffDate, string code, long idOperator, string caseNumber, string initialDate, string endDate, long idPopulation, dynamic listFileEntity)
-        {
-            dynamic head = new
-            {
-                Module = fileName.Substring(0, 3),
-                Source = fileName.Substring(3, 3),
-                Information = fileName.Substring(6, 4),
-                CutOffDate = cutOffDate,
-                IdentificationTypeEntity = fileName.Substring(18, 2),
-                IdentificationNumberEntity = fileName.Substring(20, 12),
-                RegimeType = fileName.Substring(32, 1),
-                ConsecutiveFile = fileName.Substring(33, 2),
-                Code = code,
-                ProcessDate = DateTime.Now,
-                InitialDate = initialDate,
-                EndDate = endDate,
-                TotalRecord = listFileEntity.Count,
-                IdOperator = idOperator,
-                CaseNumber = caseNumber,
-                IdTypePopulation = idPopulation,
-            };
-
-
-            string urlHead = "http://davincilb.ophelia.co:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505";
-            ENT_ActionResult resultHead = SYS_WSPOST(urlHead, head, null, null);
-
-            dynamic head2 = USR_SplitList4505(listFileEntity, 4000);
-
-            if (resultHead.IsSuccessful)
-            {
-                ENT_ActionResult result = new ENT_ActionResult();
-                string url = "http://davincilb.ophelia.co:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505Lotes";
-                foreach (var listaLotes in head2)
-                {
-                    dynamic head3 = new
-                    {
-                        ListResolutionDetail = listaLotes,
-                        HeadDetail = resultHead.Result
-                    };
-                    result = SYS_WSPOST(url, head3, null, null);
-                }
-                return result;
-            }
-            return resultHead;
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="Parameters4505">Entidad 4505 parametros enviados desde el motor</param>
-        public static dynamic USR_Main4505(ENT_parameters4505 Parameters4505)
-        {
-            //Constantes
-            const string lineSeparator = "\r\n";
-            const string columnSeparator = "|";
-            const int ColumnLength = 119;
-            const string folder = "Resolucion4505ResultEstructura";
-
-            //Validacion de parametros
-            if (Parameters4505 == null) throw new ArgumentException($"La entidad no puede ser vacía");
-            if (Parameters4505.LibraryId == 0) throw new ArgumentException($"El Id de la Libreria no puede estar vacío");
-            if (Parameters4505.CompanyId == 0) throw new ArgumentException($"El Id de la Compañia no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.CaseNumber)) throw new ArgumentException($"El numero de Caso no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.UserCode)) throw new ArgumentException($"El Codigo del usuario no puede estar vacío");
-            if (string.IsNullOrWhiteSpace(Parameters4505.FileId)) throw new ArgumentException($"El Id del Archivo no puede estar vacío");
-
-            var listErrors = new List<string>();
-            var resultValidation = USR_ValidateRule4505(lineSeparator, columnSeparator, Parameters4505.CompanyId, Parameters4505.LibraryId, Parameters4505.FileId, ColumnLength, typeof(ENT_StructureRes4505En), listErrors);
-
-            if (listErrors.Count > 0)
-            {
-                //Lista retorno de archivo de errores
-                List<string> Listkey = new List<string>();
-                List<string> ListValue = new List<string>();
-                int conteo = 1;
-                foreach (var error in listErrors)
-                {
-                    string data = error;
-                    data = data.Replace("AAAA|MM|DD", "AAAA-MM-DD").Replace("1800|01|01", "1800-01-01");
-                    string[] lines = data.Split(Convert.ToChar(columnSeparator));
-                    if (lines.Length == 1)
-                    {
-                        Listkey.Add(string.Concat($"Error {conteo}"));
-                        ListValue.Add(string.Concat(lines[0].Trim(), $" verifique el archivo"));
-                        conteo++;
-                    }
-                    else if (lines.Length > 1 && lines.Length <= 3)
-                    {
-                        Listkey.Add(lines[0]);
-                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim()));
-                    }
-                    else
-                    {
-                        Listkey.Add(lines[0]);
-                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim(), columnSeparator, lines[3].Trim()));
-                    }
-                }
-
-                //Log de errores expresiones regulares
-                string pathFile = string.Empty;
-                if (ListValue.Count != 0)
-                    pathFile = USR_GenericSaveLog4505(new Dictionary<List<string>, List<string>>() { [Listkey] = ListValue }, folder);
-                else
-                    pathFile = USR_GenericSaveLog(new Dictionary<string, List<string>>() { ["4505"] = Listkey }, folder);
-
-
-                var attach = USR_WSAttachFileToProcess(pathFile, Parameters4505.UserCode, Parameters4505.CompanyId.ToString(), Parameters4505.CaseNumber, "4505");
-                if (attach.IsError)
-                {
-                    attach.ErrorMessage = "No se pudo asociar el archivo al proceso, ya que el archivo TXT no fue encontrado con los datos suministrados, favor verificar si se cargo en la plantilla de manera correcta.";
-                    return attach;
-                }
-                return new ENT_ActionResult() { FileName = attach.FileName, IsError = true, ErrorMessage = "Hubo errores en la validación " };
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultValidation.Result, FileName = resultValidation.FileName };
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idPersons">idPersons</param>
-        public static ENT_ActionResult USR_GetPersonByTypePopulation(long adapterId, dynamic idPersons)
-        {
-            StringBuilder sbPersonByNumber = new StringBuilder();
-            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
-            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
-            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
-            foreach (var idPerson in idPersons[0])
-                sbPersonByNumber.Append($"<id>{idPerson}</id>");
-            sbPersonByNumber.Append(" </ids></root> ';");
-            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
-            sbPersonByNumber.Append(" SELECT  DISTINCT IdPerson,IdTypePopulation,IdDocumentType,DocumentNumber  FROM affiliate A  WITH (NOLOCK)  INNER JOIN Person B ON A.IdPerson = B.Id WHERE A.IdPerson IN ( ");
-            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(40) '.')); ");
-            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene persona por tipo y numero de identificación
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idDocumentType">idDocumentType</param>
-        /// <param name="documentNumber">documentNumber</param>
-        public static ENT_ActionResult USR_GetPersonByTypeAndDocumentNumber(long adapterId, string idDocumentType, string documentNumber)
-        {
-            var sql = new StringBuilder();
-            sql.Append(" SELECT IdDocumentType, DocumentNumber ");
-            sql.Append(" FROM Person WITH (NOLOCK)");
-            sql.Append($" WHERE IdDocumentType = {idDocumentType} AND DocumentNumber = '{documentNumber}'");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene persona por tipo de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="documentsNumbers">documentsNumbers</param>
-        public static ENT_ActionResult USR_GetPersonByDocumentNumber(long adapterId, dynamic documentsNumbers)
-        {
-            StringBuilder sbPersonByNumber = new StringBuilder();
-            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
-            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
-            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
-            foreach (var documentNumber in documentsNumbers)
-                sbPersonByNumber.Append($"<id>{documentNumber.Identification}</id>");
-            sbPersonByNumber.Append(" </ids></root> ';");
-            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
-            sbPersonByNumber.Append(" SELECT  DISTINCT Id,IdDocumentType, DocumentNumber FROM Person WITH (NOLOCK) WHERE DocumentNumber IN( ");
-            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(15) '.')); ");
-            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-
-        }
-        /// <sumary>
-        /// Obtiene detalles de novedad
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="personsNoExist">personsNoExist</param>
-        public static ENT_ActionResult USR_GetNoveltyDetail(long adapterId, dynamic personsNoExist)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append(" DECLARE @x xml; ");
-            sql.Append(" SET @x = '<root><ids> ");
-            foreach (var documentNumber in personsNoExist)
-                sql.Append($"<id>{documentNumber.Identification}</id>");
-            sql.Append(" </ids></root> ';");
-            sql.Append("  SELECT IdNovelty, OldValue, NewValue  FROM NoveltyDetail WITH (NOLOCK) WHERE OldValue IN(select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)) AND FieldName='Número de Documento'; ");
-
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene novedades por tipo de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="idNovelty">idNovelty</param>
-        public static ENT_ActionResult USR_GetNoveltiesTypeDocumentByPerson(long adapterId, string idNovelty)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append($"select * from NoveltyDetail where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate = (select IdAffiliate from Novelty where Id = '{idNovelty}'))");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene las novedades por afiliado
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        /// <param name="personList">personList</param>
-        public static ENT_ActionResult USR_GetNoveltiesAffiliate(long adapterId, dynamic personList)
-        {
-            StringBuilder sql = new StringBuilder();
-            sql.Append(" DECLARE @x xml; ");
-            sql.Append(" SET @x = '<root><ids> ");
-            foreach (var documentNumber in personList)
-                sql.Append($"<id>{documentNumber.Identification}</id>");
-            sql.Append(" </ids></root> ';");
-
-            sql.Append("select NoveltyDetail.IdNovelty, Person.IdDocumentType, Person.DocumentNumber, NoveltyDetail.FieldName, NoveltyDetail.OldValue, NoveltyDetail.NewValue, Novelty.FiscalEffectDate ");
-            sql.Append("from NoveltyDetail inner join Novelty on Novelty.Id = NoveltyDetail.IdNovelty inner join Affiliate on Novelty.IdAffiliate = Affiliate.Id inner join Person on Person.Id = Affiliate.IdPerson ");
-            sql.Append($"where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate in (select Id from Affiliate where IdPerson in (select Id from Person where DocumentNumber in (select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)))))");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Obtiene tipos de documento
-        /// </sumary> 
-        /// <param name="adapterId">adapterId</param>
-        public static ENT_ActionResult USR_GetDocumentTypes(long adapterId)
-        {
-            var sql = new StringBuilder();
-            sql.Append(" SELECT Id, Code ");
-            sql.Append(" FROM TypeDetail WITH (NOLOCK)");
-            sql.Append(" WHERE IdTypeHead = 1");
-            var resultExecute = SYS_WSExecuteQuery(adapterId, sql.ToString());
-            if (resultExecute.IsError)
-            {
-                return resultExecute;
-            }
-            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="dictionaryResult">dictionaryResult</param>
-        /// <param name="folder">folder</param>
-        public static string USR_GenericSaveLog4505(dynamic dictionaryResult, string folder)
-        {
-            try
-            {
-                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
-
-                if (!Directory.Exists(pathName))
-                    Directory.CreateDirectory(pathName);
-
-                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
-
-                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    sw.WriteLine("Fila;Mensaje");
-                    foreach (var file in dictionaryResult)
-                    {
-                        for (int i = 0; i < file.Value.Count; i++)
-                        {
-                            sw.WriteLine($"{file.Key[i]};{file.Value[i]}");
-                        }
-                        sw.Flush();
-                    }
-                }
-
-                return pathName;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Guarda log de un archivo 
-        /// </sumary> 
-        /// <param name="dictionaryResult">Dictionary con entidades a escribir en el log</param>
-        /// <param name="folder">carpeta donde se va a guardar el archivo</param>
-        public static string USR_GenericSaveLog(dynamic dictionaryResult, string folder)
-        {
-            try
-            {
-
-                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
-
-                if (!Directory.Exists(pathName))
-                    Directory.CreateDirectory(pathName);
-
-                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
-
-                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
-                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
-                {
-                    sw.WriteLine("ARCHIVO;MENSAJE");
-                    foreach (var file in dictionaryResult)
-                    {
-                        for (int i = 0; i < file.Value.Count; i++)
-                        {
-                            sw.WriteLine($"{file.Key};{file.Value[i]}");
-                        }
-                        sw.Flush();
-                    }
-                }
-
-                return pathName;
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="remoteFile">Ruta destino de archivo a subir</param>
-        /// <param name="localFile">FileStream de archivo a subir</param>
-        public static string USR_FtpUpload(string remoteFile, dynamic localFile)
-        {
-            try
-            {
-                string ftp = "davincilb.ophelia.co";
-                string userName = "OpheliaDcom";
-                string password = "iCNw7vyq6O";
-
-                string host = ("ftp://" + ftp);
-
-                if (string.IsNullOrEmpty(ftp) || string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
-                {
-                    throw new ArgumentNullException("ftp,userName,password");
-                }
-                int bufferSize = 2048;
-                /* Create an FTP Request */
-                FtpWebRequest ftpRequest = (FtpWebRequest)FtpWebRequest.Create(host + "/" + remoteFile);
-                /* Log in to the FTP Server with the User Name and Password Provided */
-                ftpRequest.Credentials = new NetworkCredential(userName, password);
-                /* When in doubt, use these options */
-                ftpRequest.UseBinary = true;
-                ftpRequest.UsePassive = true;
-                ftpRequest.KeepAlive = true;
-                /* Specify the Type of FTP Request */
-                ftpRequest.Method = WebRequestMethods.Ftp.UploadFile;
-                /* Establish Return Communication with the FTP Server */
-                Stream ftpStream = ftpRequest.GetRequestStream();
-                /* Buffer for the Downloaded Data */
-                localFile.Position = 0;
-                byte[] byteBuffer = new byte[bufferSize];
-                int bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
-                /* Upload the File by Sending the Buffered Data Until the Transfer is Complete */
-                while (bytesSent != 0)
-                {
-                    ftpStream.Write(byteBuffer, 0, bytesSent);
-                    bytesSent = localFile.Read(byteBuffer, 0, bufferSize);
-                }
-
-                /* Resource Cleanup */
-                localFile.Close();
-                ftpStream.Close();
-                using (FtpWebResponse response = (FtpWebResponse)ftpRequest.GetResponse())
-                {
-                    ftpRequest = null;
-                    return response.StatusDescription;
-                }
-            }
-            catch
-            {
-                throw;
-            }
-        }
-        /// <sumary>
-        /// Plantilla de Función vacía
-        /// </sumary> 
-        /// <param name="listErrors">Variable de parámetro de función vacía</param>
-        /// <param name="index">index</param>
-        /// <param name="listaQualification">listaQualification</param>
-        /// <param name="listOccupationCode">listOccupationCode</param>
-        /// <param name="ent">ent</param>
-        public static dynamic USR_FieldsValidate4505(List<string> listErrors, long index, List<dynamic> listaQualification, List<dynamic> listOccupationCode, ENT_StructureRes4505En ent)
-        {
-            //Codigos de habilitacion  => 
-            string pipe = "|";
-
-            //Valida codigo de habilitacion campo 2
-            if (!(ent.HabilitationCode.Equals("0") || ent.HabilitationCode.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 2"));
-
-            //Valida codigo HabilitationCodeCytology campo 90
-            if (!(ent.HabilitationCodeCytology.Equals("0") || ent.HabilitationCodeCytology.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeCytology) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 90"));
-
-            //Valida codigo HabilitationCodeCytology campo 92
-            if (!(ent.HabilitationCodeColposcopy.Equals("0") || ent.HabilitationCodeColposcopy.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeColposcopy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 92"));
-
-            //Valida codigo HabilitationCodeCytology campo 95
-            if (!(ent.HabilitationCodeBiopsy.Equals("0") || ent.HabilitationCodeBiopsy.Equals("999")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeBiopsy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 95"));
-
-            //Valida codigo HabilitationCodeCytology campo 98
-            if (!(ent.HabilitationCodeMammography.Equals("0") || ent.HabilitationCodeMammography.Equals("0")))
-                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeMammography) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 98"));
-
-            //Valida codigo de Ocupacion
-            if (!(ent.OccupationCode.Equals("9999") || ent.OccupationCode.Equals("9998")))
-                if (listOccupationCode.FirstOrDefault(x => x.Code == ent.OccupationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de Ocupacion en la BD o es invalido variable 12"));
-
-            //Valida WeightKg peso variable 30
-            if (!(ent.WeightKg.Equals("999")))
-            {
-                if(Convert.ToDouble(ent.WeightKg.Replace(".",",")) < 1 || Convert.ToDouble(ent.WeightKg.Replace(".", ",")) > 250)
-                {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 1 a 249.9"));
-                }
-            }
-
-            //Valida hemoglobina variable 104
-            if (!(ent.ResultHemoglobin.Equals("999")))
-            {
-                if (Convert.ToDouble(ent.ResultHemoglobin.Replace(".", ",")) < 1.5 || Convert.ToDouble(ent.ResultHemoglobin.Replace(".", ",")) > 20)
-                {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 1.5  a 20"));
-                }
-            }
-
-            //Valida hemoglobina variable 107
-            if (!(ent.ResultCreatinine.Equals("999")))
-            {
-                if (Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) < 0.2 || Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) > 25)
-                {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 0.2 a 25"));
-                }
-            }
-
-            //Valida hemoglobina variable 109
-            if (!(ent.ResultGlycosylatedHemoglobin.Equals("999")))
-            {
-                if (Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(".", ",")) < 5 || Convert.ToDouble(ent.ResultCreatinine.Replace(".", ",")) > 20)
-                {
-                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "El rango debe ser un numero decimal de 5 a 20"));
-                }
-            }
-
-            return true;
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web
-        /// </sumary> 
-        /// <param name="method">Método del servicio</param>
-        /// <param name="url">Url del servicio web</param>
-        /// <param name="parameters">Parámetros del método a consumir</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        /// <param name="fileFullPath">fileFullPath</param>
-        /// <param name="minTimeout">Minutos de timeout</param>
-        public static ENT_ActionResult SYS_WSRequest(string method, string url, object parameters, dynamic headers, string fileFullPath, double? minTimeout)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(url))
-                {
-                    throw new ArgumentNullException("method or url");
-                }
-
-                HttpMethod httpMethod = new HttpMethod(method);
-                double min = minTimeout != null && minTimeout > 0 ? (double)minTimeout : 3;
-                using (HttpClient Client = new HttpClient { Timeout = TimeSpan.FromMinutes(min) })
-                {
-                    using (var request = new HttpRequestMessage(httpMethod, url))
-                    {
-                        if (parameters != null)
-                        {
-                            request.Content = new StringContent(JsonConvert.SerializeObject(parameters), Encoding.UTF8, "application/json");
-                        }
-
-                        if (headers != null)
-                        {
-                            foreach (KeyValuePair<String, String> header in headers)
-                            {
-                                request.Headers.Add(header.Key, header.Value);
-                            }
-                        }
-
-                        using (HttpResponseMessage response = Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead).Result)
-                        {
-                            using (HttpContent content = response.Content)
-                            {
-                                string result = content.ReadAsStringAsync().Result;
-
-                                if (response.StatusCode == HttpStatusCode.OK)
-                                {
-                                    var resultWs = JsonConvert.DeserializeObject<dynamic>(result);
-                                    if ((bool)resultWs.IsError)
-                                    {
-                                        return new ENT_ActionResult() { IsError = true, ErrorMessage = resultWs.ErrorMessage };
-                                    }
-                                    return new ENT_ActionResult() { IsSuccessful = resultWs.IsSucessfull, Result = resultWs.Result };
-
-                                }
-
-                                else
-                                    return new ENT_ActionResult() { IsError = true, ErrorMessage = result };
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.InnerException.Message + ex.StackTrace };
-            }
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web POST
-        /// </sumary> 
-        /// <param name="url">Url del Servicio Web</param>
-        /// <param name="parameters">Parámetros del servicio</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        /// <param name="fileFullPath">fileFullPath</param>
-        public static ENT_ActionResult SYS_WSPOST(string url, object parameters, dynamic headers, string fileFullPath)
-        {
-            ENT_ActionResult result = new ENT_ActionResult();
-            result = SYS_WSRequest("POST", url, parameters, headers, fileFullPath, null);
-            return result;
-        }
-        /// <sumary>
-        /// Función estándar para el consumo de un servicio web GET
-        /// </sumary> 
-        /// <param name="url">Url del servicio Web</param>
-        /// <param name="headers">Cabecera del servicio</param>
-        public static ENT_ActionResult SYS_WSGET(string url, dynamic headers)
-        {
-            ENT_ActionResult result = new ENT_ActionResult();
-            result = SYS_WSRequest("GET", url, null, headers, null, null);
-            return result;
-        }
-        /// <sumary>
-        /// Ejecuta una consulta Sql con el adaptador
-        /// </sumary> 
-        /// <param name="adapterId">Id del adaptador</param>
-        /// <param name="queryBD">Consulta Sql</param>
-        public static ENT_ActionResult SYS_WSExecuteQuery(long adapterId, string queryBD)
-        {
-            try
-            {
-                if (string.IsNullOrEmpty(queryBD))
-                {
-                    throw new ArgumentNullException("queryBD");
-                }
-
-                var plainTextBytes = Encoding.UTF8.GetBytes(queryBD);
-                var query = Convert.ToBase64String(plainTextBytes);
-
-                ENT_ActionResult result = new ENT_ActionResult();
-                string url = "http://davincilb.ophelia.co:8080/api/api/Adapter/ExecuteQuery";
-                dynamic jsonObject = new JObject();
-                jsonObject.adapterId = adapterId;
-                jsonObject.queryBD = query;
-                result = SYS_WSPOST(url, jsonObject, null, null);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
-            }
-        }
-        /// <sumary>
-        /// Prototipo de verificación
-        /// </sumary> 
-        /// <param name="rules">Reglas a evaluar</param>
-        public static object SYS_VerificationPrototype(object rules)
-        {
-            IEnumerable<Func<object>> funcs = ((IEnumerable<Func<object>>)rules);
-
-            string messages = string.Empty;
-            bool result = true;
-            foreach (Func<object> rul in funcs)
-            {
-                var r = rul();
-                if (!r.GetPropertyValue<bool>("IsValid"))
-                {
-                    result = false;
-                    messages += "* " + r.GetPropertyValue<string>("Message") + "\n\r";
-                }
-            }
-
-            return new { Result = result, Messages = messages };
-        }
+        #region Members
+        #endregion
         /// <sumary>
         /// Convierte los registros de una archivo a una lista de entidades
         /// </sumary> 
@@ -23653,6 +23108,704 @@ namespace OpheliaSuiteV2.BRMRuntime
                 throw;
             }
         }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idPersons">idPersons</param>
+        public static ENT_ActionResult USR_GetPersonByTypePopulation(long adapterId, dynamic idPersons)
+        {
+            StringBuilder sbPersonByNumber = new StringBuilder();
+            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
+            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
+            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
+            foreach (var idPerson in idPersons[0])
+                sbPersonByNumber.Append($"<id>{idPerson}</id>");
+            sbPersonByNumber.Append(" </ids></root> ';");
+            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
+            sbPersonByNumber.Append(" SELECT  DISTINCT IdPerson,IdTypePopulation,IdDocumentType,DocumentNumber  FROM affiliate A  WITH (NOLOCK)  INNER JOIN Person B ON A.IdPerson = B.Id WHERE A.IdPerson IN ( ");
+            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(40) '.')); ");
+            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Ejecuta una consulta Sql con el adaptador
+        /// </sumary> 
+        /// <param name="adapterId">Id del adaptador</param>
+        /// <param name="queryBD">Consulta Sql</param>
+        public static ENT_ActionResult SYS_WSExecuteQuery(long adapterId, string queryBD)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(queryBD))
+                {
+                    throw new ArgumentNullException("queryBD");
+                }
+
+                var plainTextBytes = Encoding.UTF8.GetBytes(queryBD);
+                var query = Convert.ToBase64String(plainTextBytes);
+
+                ENT_ActionResult result = new ENT_ActionResult();
+                string url = "http://davincilb.ophelia.co:8080/api/api/Adapter/ExecuteQuery";
+                dynamic jsonObject = new JObject();
+                jsonObject.adapterId = adapterId;
+                jsonObject.queryBD = query;
+                result = Helper.SYS_WSPOST(url, jsonObject, null, null);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ENT_ActionResult() { IsError = true, ErrorMessage = ex.Message + ex.StackTrace };
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="personList">personList</param>
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="listErrors">listErrors</param>
+        /// <param name="listpersonByPopulation">listpersonByPopulation</param>
+        /// <param name="IdTypePopulation">IdTypePopulation</param>
+        /// <param name="_entity">_entity</param>
+        /// <param name="_dictionaryDocumentType">_dictionaryDocumentType</param>
+        public static List<string> USR_ValidateAffiliatePersonResolutions(List<dynamic> personList, long adapterId, List<string> listErrors, List<dynamic> listpersonByPopulation, long IdTypePopulation, List<ENT_StructureRes4505En> _entity, dynamic _dictionaryDocumentType)
+        {
+            //Consulta en la tabla person
+            ENT_ActionResult persons = Helper.USR_GetPersonByDocumentNumber(adapterId, personList);
+            if (persons.IsError) throw new Exception(persons.ErrorMessage);
+            List<dynamic> listpersonByDocumentNumber = JsonConvert.DeserializeObject<List<dynamic>>(persons.Result.ToString());
+            Dictionary<string, dynamic> dictionarypersonByDocumentNumber = listpersonByDocumentNumber.ToDictionary(x => $"{x.IdDocumentType}_{x.DocumentNumber}", x => x);
+
+            //Valida tipo de poblacion
+            var res = (from p in listpersonByDocumentNumber select p.Id).ToList();
+            listpersonByPopulation.Add(res);
+            ENT_ActionResult personsPopulation = Helper.USR_GetPersonByTypePopulation(adapterId, listpersonByPopulation);
+            if (personsPopulation.IsError) throw new Exception(persons.ErrorMessage);
+            List<ENT_Person4505> listpersonBypersonsPopulation = JsonConvert.DeserializeObject<List<ENT_Person4505>>(personsPopulation.Result.ToString());
+
+            int index = 1;
+            foreach (var ent in _entity)
+            {
+                var documentTypeDictionary = _dictionaryDocumentType[ent.IdentificationType];
+
+                if (listpersonBypersonsPopulation.Exists(f => f.IdDocumentType == documentTypeDictionary && f.DocumentNumber == ent.DocumentNumber))
+                {
+                    if (listpersonBypersonsPopulation.Exists(f => f.DocumentNumber == ent.DocumentNumber && f.IdTypePopulation != IdTypePopulation.ToString()))
+                        listErrors.Add(string.Concat($" Fila {index}", "|El tipo de afiliado en el archivo no corresponde al tipo de afiliado seleccionado en la plantilla ", $" numero {ent.DocumentNumber}"));
+                }
+                index++;
+            }
+
+            List<dynamic> personsNoExist = new List<dynamic>();
+
+            foreach (var person in personList)
+            {
+                if (!dictionarypersonByDocumentNumber.ContainsKey($"{person.DocumentType}_{person.Identification}"))
+                {
+                    personsNoExist.Add(person);
+
+                }
+            }
+            if (personsNoExist.Count > 0)
+            {
+
+                ENT_ActionResult novelty = Helper.USR_GetNoveltyDetail(adapterId, personsNoExist);
+                if (novelty.IsError)
+                {
+                    throw new Exception(novelty.ErrorMessage);
+                }
+                List<dynamic> novChangeNumDoc = JsonConvert.DeserializeObject<List<dynamic>>(novelty.Result.ToString());
+                if (novChangeNumDoc.Count > 0)
+                {
+                    foreach (var itemNoveltyDetail in novChangeNumDoc)
+                    {
+                        var novelties = Helper.USR_GetNoveltiesTypeDocumentByPerson(adapterId, itemNoveltyDetail.IdNovelty.ToString());
+                        if (novelties.IsError)
+                        {
+                            throw new Exception(novelties.ErrorMessage);
+                        }
+                        List<dynamic> listNovelties = JsonConvert.DeserializeObject<List<dynamic>>(novelties.Result.ToString());
+                        foreach (var itemNovelty in listNovelties)
+                        {
+                            var person = Helper.USR_GetPersonByTypeAndDocumentNumber(adapterId, itemNovelty.NewValue.ToString(), itemNoveltyDetail.NewValue.ToString());
+                            if (person.IsError)
+                            {
+                                throw new Exception(person.ErrorMessage);
+                            }
+                            List<dynamic> personBD = JsonConvert.DeserializeObject<List<dynamic>>(person.Result.ToString());
+                            if (personBD != null && personBD.Count > 0)
+                            {
+                                personsNoExist.RemoveAll(d => d.Identification == itemNoveltyDetail.OldValue.ToString());
+                                break;
+                            }
+                        }
+                    }
+
+                }
+                //Valida cambio de tipo de documento       
+
+                var novelties2 = Helper.USR_GetNoveltiesAffiliate(adapterId, personsNoExist);
+                if (novelties2.IsError)
+                {
+                    throw new Exception(novelties2.ErrorMessage);
+                }
+                List<dynamic> listNovelties2 = JsonConvert.DeserializeObject<List<dynamic>>(novelties2.Result.ToString());
+                Dictionary<string, dynamic> dictionaryNovelties2 = listNovelties2.ToDictionary(x => $"{x.OldValue}_{x.DocumentNumber}", x => x);
+                List<Tuple<int, string>> ForDelete = new List<Tuple<int, string>>();
+
+                foreach (var itemPerson in personsNoExist)
+                {
+                    if (dictionaryNovelties2.ContainsKey($"{itemPerson.DocumentType}_{itemPerson.Identification}"))
+                    {
+                        Tuple<int, string> tuple = new Tuple<int, string>(int.Parse(itemPerson.DocumentType), itemPerson.Identification);
+
+                        ForDelete.Add(tuple);
+                    }
+                }
+
+                foreach (var item in ForDelete)
+                {
+                    personsNoExist.RemoveAll(d => d.Identification == item.Item2);
+                }
+
+                foreach (var item in personsNoExist)
+                {
+                    listErrors.Add($"item {item.Index}|La persona identificada con tipo de documento {item.typeId} Número {item.Identification} registrada el|no existe");
+                }
+            }
+
+            return listErrors;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene persona por tipo y numero de identificación
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idDocumentType">idDocumentType</param>
+        /// <param name="documentNumber">documentNumber</param>
+        public static ENT_ActionResult USR_GetPersonByTypeAndDocumentNumber(long adapterId, string idDocumentType, string documentNumber)
+        {
+            var sql = new StringBuilder();
+            sql.Append(" SELECT IdDocumentType, DocumentNumber ");
+            sql.Append(" FROM Person WITH (NOLOCK)");
+            sql.Append($" WHERE IdDocumentType = {idDocumentType} AND DocumentNumber = '{documentNumber}'");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene persona por tipo de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="documentsNumbers">documentsNumbers</param>
+        public static ENT_ActionResult USR_GetPersonByDocumentNumber(long adapterId, dynamic documentsNumbers)
+        {
+            StringBuilder sbPersonByNumber = new StringBuilder();
+            sbPersonByNumber.Append(" DECLARE @XmlDocumentHandle int; ");
+            sbPersonByNumber.Append(" DECLARE @XmlDocument xml; ");
+            sbPersonByNumber.Append(" SET @XmlDocument = '<root><ids> ");
+            foreach (var documentNumber in documentsNumbers)
+                sbPersonByNumber.Append($"<id>{documentNumber.Identification}</id>");
+            sbPersonByNumber.Append(" </ids></root> ';");
+            sbPersonByNumber.Append("  EXEC sp_xml_preparedocument @XmlDocumentHandle OUTPUT, @XmlDocument; ");
+            sbPersonByNumber.Append(" SELECT  DISTINCT Id,IdDocumentType, DocumentNumber FROM Person WITH (NOLOCK) WHERE DocumentNumber IN( ");
+            sbPersonByNumber.Append(" SELECT id FROM OPENXML (@XmlDocumentHandle, '/root/ids/id',1) WITH (id  varchar(15) '.')); ");
+            sbPersonByNumber.Append(" EXEC sp_xml_removedocument @XmlDocumentHandle; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sbPersonByNumber.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene detalles de novedad
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="personsNoExist">personsNoExist</param>
+        public static ENT_ActionResult USR_GetNoveltyDetail(long adapterId, dynamic personsNoExist)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append(" DECLARE @x xml; ");
+            sql.Append(" SET @x = '<root><ids> ");
+            foreach (var documentNumber in personsNoExist)
+                sql.Append($"<id>{documentNumber.Identification}</id>");
+            sql.Append(" </ids></root> ';");
+            sql.Append("  SELECT IdNovelty, OldValue, NewValue  FROM NoveltyDetail WITH (NOLOCK) WHERE OldValue IN(select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)) AND FieldName='Número de Documento'; ");
+
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene novedades por tipo de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="idNovelty">idNovelty</param>
+        public static ENT_ActionResult USR_GetNoveltiesTypeDocumentByPerson(long adapterId, string idNovelty)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append($"select * from NoveltyDetail where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate = (select IdAffiliate from Novelty where Id = '{idNovelty}'))");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene las novedades por afiliado
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="personList">personList</param>
+        public static ENT_ActionResult USR_GetNoveltiesAffiliate(long adapterId, dynamic personList)
+        {
+            StringBuilder sql = new StringBuilder();
+            sql.Append(" DECLARE @x xml; ");
+            sql.Append(" SET @x = '<root><ids> ");
+            foreach (var documentNumber in personList)
+                sql.Append($"<id>{documentNumber.Identification}</id>");
+            sql.Append(" </ids></root> ';");
+
+            sql.Append("select NoveltyDetail.IdNovelty, Person.IdDocumentType, Person.DocumentNumber, NoveltyDetail.FieldName, NoveltyDetail.OldValue, NoveltyDetail.NewValue, Novelty.FiscalEffectDate ");
+            sql.Append("from NoveltyDetail inner join Novelty on Novelty.Id = NoveltyDetail.IdNovelty inner join Affiliate on Novelty.IdAffiliate = Affiliate.Id inner join Person on Person.Id = Affiliate.IdPerson ");
+            sql.Append($"where FieldName = 'ID Tipo Documento' and IdNovelty in (select Id from Novelty where IdAffiliate in (select Id from Affiliate where IdPerson in (select Id from Person where DocumentNumber in (select T.X.value('(text())[1]', 'varchar(15)') as id from @X.nodes('/root/ids/id') as T(X)))))");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        /// <param name="_entity">_entity</param>
+        /// <param name="listErrors">listErrors</param>
+        /// <param name="index">index</param>
+        /// <param name="listDocumentTypesDB">listDocumentTypesDB</param>
+        /// <param name="IdTypePopulation">IdTypePopulation</param>
+        public static long USR_ValidateDocumentNumber4505(long adapterId, List<ENT_StructureRes4505En> _entity, List<string> listErrors, long index, List<dynamic> listDocumentTypesDB, long IdTypePopulation)
+        {
+            index = 1;
+            //Funcion valida si el usuario existe
+            List<dynamic> personList = new List<dynamic>();
+            var listErrorsDocumentNumber = new List<string>();
+            Dictionary<string, ENT_StructureRes4505En> _dictionary4505 = new Dictionary<string, ENT_StructureRes4505En>();
+            Dictionary<string, string> _dictionaryDocumentType = new Dictionary<string, string>();
+            _dictionaryDocumentType.Add("TI", "3");
+            _dictionaryDocumentType.Add("CC", "1");
+            _dictionaryDocumentType.Add("CE", "6");
+            _dictionaryDocumentType.Add("PA", "7");
+            _dictionaryDocumentType.Add("RC", "2");
+            _dictionaryDocumentType.Add("SC", "4");
+            _dictionaryDocumentType.Add("CD", "9");
+            _dictionaryDocumentType.Add("NV", "1423");
+            _dictionaryDocumentType.Add("MS", "1424");
+            _dictionaryDocumentType.Add("AS", "2825");
+            _dictionaryDocumentType.Add("UN", "3271");
+
+            foreach (ENT_StructureRes4505En file in _entity)
+            {
+                if (!_dictionary4505.ContainsKey($"{file.IdentificationType}_{file.DocumentNumber}"))
+                    _dictionary4505.Add($"{file.IdentificationType}_{file.DocumentNumber}", file);
+
+                if (_dictionaryDocumentType.ContainsKey(file.IdentificationType))
+                {
+                    var documentTypeDictionary = _dictionaryDocumentType[file.IdentificationType];
+
+                    var documentTypeBD = listDocumentTypesDB.Where(d => d.Id == documentTypeDictionary).FirstOrDefault();
+                    // Agrega personas para consultarlas posteriormente
+                    personList.Add(new { DocumentType = documentTypeBD.Id.ToString(), Identification = file.DocumentNumber, Index = index, typeId = file.IdentificationType });
+                }
+                index++;
+            }
+            List<dynamic> listpersonByPopulation = new List<dynamic>();
+            Helper.USR_ValidateAffiliatePersonResolutions(personList, adapterId, listErrorsDocumentNumber, listpersonByPopulation, IdTypePopulation, _entity, _dictionaryDocumentType);
+            var newlist = listErrorsDocumentNumber.Select(x => x.Replace("item", "Fila")).ToList();
+
+
+            listErrors.AddRange(newlist);
+            return index;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="sourceList">sourceList</param>
+        /// <param name="maxSubItems">maxSubItems</param>
+        public static dynamic USR_SplitList4505(List<ENT_StructureRes4505En> sourceList, long maxSubItems)
+        {
+            return sourceList
+                .Select((x, i) => new { Index = i, Value = x })
+                .GroupBy(x => x.Index / maxSubItems)
+                .Select(x => x.Select(v => v.Value).ToList())
+                .ToList();
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="fileName">fileName</param>
+        /// <param name="cutOffDate">cutOffDate</param>
+        /// <param name="code">code</param>
+        /// <param name="idOperator">idOperator</param>
+        /// <param name="caseNumber">caseNumber</param>
+        /// <param name="initialDate">initialDate</param>
+        /// <param name="endDate">endDate</param>
+        /// <param name="idPopulation">idPopulation</param>
+        /// <param name="listFileEntity">listFileEntity</param>
+        public static ENT_ActionResult USR_Save4505File(string fileName, string cutOffDate, string code, long idOperator, string caseNumber, string initialDate, string endDate, long idPopulation, dynamic listFileEntity)
+        {
+            dynamic head = new
+            {
+                Module = fileName.Substring(0, 3),
+                Source = fileName.Substring(3, 3),
+                Information = fileName.Substring(6, 4),
+                CutOffDate = cutOffDate,
+                IdentificationTypeEntity = fileName.Substring(18, 2),
+                IdentificationNumberEntity = fileName.Substring(20, 12),
+                RegimeType = fileName.Substring(32, 1),
+                ConsecutiveFile = fileName.Substring(33, 2),
+                Code = code,
+                ProcessDate = DateTime.Now,
+                InitialDate = initialDate,
+                EndDate = endDate,
+                TotalRecord = listFileEntity.Count,
+                IdOperator = idOperator,
+                CaseNumber = caseNumber,
+                IdTypePopulation = idPopulation,
+            };
+
+
+            string urlHead = "http://davincilb.ophelia.co:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505";
+            ENT_ActionResult resultHead = Helper.SYS_WSPOST(urlHead, head, null, null);
+
+            dynamic head2 = Helper.USR_SplitList4505(listFileEntity, 4000);
+
+            if (resultHead.IsSuccessful)
+            {
+                ENT_ActionResult result = new ENT_ActionResult();
+                string url = "http://davincilb.ophelia.co:8085/ASSURANCE/api/Resolution4505/SaveFileHeadDetail4505Lotes";
+                foreach (var listaLotes in head2)
+                {
+                    dynamic head3 = new
+                    {
+                        ListResolutionDetail = listaLotes,
+                        HeadDetail = resultHead.Result
+                    };
+                    result = Helper.SYS_WSPOST(url, head3, null, null);
+                }
+                return result;
+            }
+            return resultHead;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="Parameters4505">Entidad 4505 parametros enviados desde el motor</param>
+        public static dynamic USR_Main4505(ENT_parameters4505 Parameters4505)
+        {
+            //Constantes
+            const string lineSeparator = "\r\n";
+            const string columnSeparator = "|";
+            const int ColumnLength = 119;
+            const string folder = "Resolucion4505ResultEstructura";
+
+            //Validacion de parametros
+            if (Parameters4505 == null) throw new ArgumentException($"La entidad no puede ser vacía");
+            if (Parameters4505.LibraryId == 0) throw new ArgumentException($"El Id de la Libreria no puede estar vacío");
+            if (Parameters4505.CompanyId == 0) throw new ArgumentException($"El Id de la Compañia no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.CaseNumber)) throw new ArgumentException($"El numero de Caso no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.UserCode)) throw new ArgumentException($"El Codigo del usuario no puede estar vacío");
+            if (string.IsNullOrWhiteSpace(Parameters4505.FileId)) throw new ArgumentException($"El Id del Archivo no puede estar vacío");
+
+            var listErrors = new List<string>();
+            var resultValidation = Helper.USR_ValidateRule4505(lineSeparator, columnSeparator, Parameters4505.CompanyId, Parameters4505.LibraryId, Parameters4505.FileId, ColumnLength, typeof(ENT_StructureRes4505En), listErrors);
+
+            if (listErrors.Count > 0)
+            {
+                //Lista retorno de archivo de errores
+                List<string> Listkey = new List<string>();
+                List<string> ListValue = new List<string>();
+                int conteo = 1;
+                foreach (var error in listErrors)
+                {
+                    string data = error;
+                    data = data.Replace("AAAA|MM|DD", "AAAA-MM-DD").Replace("1800|01|01", "1800-01-01");
+                    string[] lines = data.Split(Convert.ToChar(columnSeparator));
+                    if (lines.Length == 1)
+                    {
+                        Listkey.Add(string.Concat($"Error {conteo}"));
+                        ListValue.Add(string.Concat(lines[0].Trim(), $" verifique el archivo"));
+                        conteo++;
+                    }
+                    else if (lines.Length > 1 && lines.Length <= 3)
+                    {
+                        Listkey.Add(lines[0]);
+                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim()));
+                    }
+                    else
+                    {
+                        Listkey.Add(lines[0]);
+                        ListValue.Add(string.Concat(lines[1].Trim(), columnSeparator, lines[2].Trim(), columnSeparator, lines[3].Trim()));
+                    }
+                }
+
+                //Log de errores expresiones regulares
+                string pathFile = string.Empty;
+                if (ListValue.Count != 0)
+                    pathFile = Helper.USR_GenericSaveLog4505(new Dictionary<List<string>, List<string>>() { [Listkey] = ListValue }, folder);
+                else
+                    pathFile = Helper.USR_GenericSaveLog(new Dictionary<string, List<string>>() { ["4505"] = Listkey }, folder);
+
+
+                var attach = Helper.USR_WSAttachFileToProcess(pathFile, Parameters4505.UserCode, Parameters4505.CompanyId.ToString(), Parameters4505.CaseNumber, "4505");
+                if (attach.IsError)
+                {
+                    attach.ErrorMessage = "No se pudo asociar el archivo al proceso, ya que el archivo TXT no fue encontrado con los datos suministrados, favor verificar si se cargo en la plantilla de manera correcta.";
+                    return attach;
+                }
+                return new ENT_ActionResult() { FileName = attach.FileName, IsError = true, ErrorMessage = "Hubo errores en la validación " };
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultValidation.Result, FileName = resultValidation.FileName };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="dictionaryResult">dictionaryResult</param>
+        /// <param name="folder">folder</param>
+        public static string USR_GenericSaveLog4505(dynamic dictionaryResult, string folder)
+        {
+            try
+            {
+                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
+
+                if (!Directory.Exists(pathName))
+                    Directory.CreateDirectory(pathName);
+
+                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
+
+                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    sw.WriteLine("Fila;Mensaje");
+                    foreach (var file in dictionaryResult)
+                    {
+                        for (int i = 0; i < file.Value.Count; i++)
+                        {
+                            sw.WriteLine($"{file.Key[i]};{file.Value[i]}");
+                        }
+                        sw.Flush();
+                    }
+                }
+
+                return pathName;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Guarda log de un archivo 
+        /// </sumary> 
+        /// <param name="dictionaryResult">Dictionary con entidades a escribir en el log</param>
+        /// <param name="folder">carpeta donde se va a guardar el archivo</param>
+        public static string USR_GenericSaveLog(dynamic dictionaryResult, string folder)
+        {
+            try
+            {
+
+                string pathName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), folder);
+
+                if (!Directory.Exists(pathName))
+                    Directory.CreateDirectory(pathName);
+
+                pathName = Path.Combine(pathName, $"{folder}{DateTime.Now.ToString("yyyyMMddHHmmss")}.csv");
+
+                using (FileStream fs = new FileStream(pathName, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite))
+                using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
+                {
+                    sw.WriteLine("ARCHIVO;MENSAJE");
+                    foreach (var file in dictionaryResult)
+                    {
+                        for (int i = 0; i < file.Value.Count; i++)
+                        {
+                            sw.WriteLine($"{file.Key};{file.Value[i]}");
+                        }
+                        sw.Flush();
+                    }
+                }
+
+                return pathName;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Obtiene tipos de documento
+        /// </sumary> 
+        /// <param name="adapterId">adapterId</param>
+        public static ENT_ActionResult USR_GetDocumentTypes(long adapterId)
+        {
+            var sql = new StringBuilder();
+            sql.Append(" SELECT Id, Code ");
+            sql.Append(" FROM TypeDetail WITH (NOLOCK)");
+            sql.Append(" WHERE IdTypeHead = 1");
+            var resultExecute = Helper.SYS_WSExecuteQuery(adapterId, sql.ToString());
+            if (resultExecute.IsError)
+            {
+                return resultExecute;
+            }
+            return new ENT_ActionResult() { IsSuccessful = true, Result = resultExecute.Result };
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Plantilla de Función vacía
+        /// </sumary> 
+        /// <param name="listErrors">Variable de parámetro de función vacía</param>
+        /// <param name="index">index</param>
+        /// <param name="listaQualification">listaQualification</param>
+        /// <param name="listOccupationCode">listOccupationCode</param>
+        /// <param name="ent">ent</param>
+        public static dynamic USR_FieldsValidate4505(List<string> listErrors, long index, List<dynamic> listaQualification, List<dynamic> listOccupationCode, ENT_StructureRes4505En ent)
+        {
+            //Codigos de habilitacion  => 
+            string pipe = "|";
+
+            //Valida codigo de habilitacion campo 2
+            if (!(ent.HabilitationCode.Equals("0") || ent.HabilitationCode.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 2"));
+
+            //Valida codigo HabilitationCodeCytology campo 90
+            if (!(ent.HabilitationCodeCytology.Equals("0") || ent.HabilitationCodeCytology.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeCytology) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 90"));
+
+            //Valida codigo HabilitationCodeCytology campo 92
+            if (!(ent.HabilitationCodeColposcopy.Equals("0") || ent.HabilitationCodeColposcopy.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeColposcopy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 92"));
+
+            //Valida codigo HabilitationCodeCytology campo 95
+            if (!(ent.HabilitationCodeBiopsy.Equals("0") || ent.HabilitationCodeBiopsy.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeBiopsy) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 95"));
+
+            //Valida codigo HabilitationCodeCytology campo 98
+            if (!(ent.HabilitationCodeMammography.Equals("0") || ent.HabilitationCodeMammography.Equals("999")))
+                if (listaQualification.FirstOrDefault(x => x.QualificationCode == ent.HabilitationCodeMammography) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de habilitación en la BD o es invalido variable 98"));
+
+            //Valida codigo de Ocupacion
+            if (!(ent.OccupationCode.Equals("9999") || ent.OccupationCode.Equals("9998")))
+                if (listOccupationCode.FirstOrDefault(x => x.Code == ent.OccupationCode) == null) listErrors.Add(string.Concat($"Fila {index}", $"{pipe}", "No existe el codigo de Ocupacion en la BD o es invalido variable 12"));
+
+            //Valida WeightKg peso variable 30
+            if (!(ent.WeightKg.Equals("999")))
+            {
+                if (Convert.ToDouble(ent.WeightKg.Replace(",", ".")) < 0 || Convert.ToDouble(ent.WeightKg.Replace(",", ".")) > 249)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 30", $"{pipe}", "Peso en kilogramos", $"{pipe}", "El rango debe ser un numero menor a 250 o 999 max 1 decimal"));
+                }
+            }
+
+            //Valida hemoglobina variable 104
+            if (!(ent.ResultHemoglobin.Equals("0")))
+            {
+                if (Convert.ToDouble(ent.ResultHemoglobin.Replace(",", ".")) < 1.5 || Convert.ToDouble(ent.ResultHemoglobin.Replace(",", ".")) > 20)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 104", $"{pipe}", "ResultadoHemoglobina", $"{pipe}", "El rango debe ser un numero decimal de 1.5 a 20 ó 0"));
+                }
+            }
+
+            //Valida hemoglobina variable 107
+            if (!ent.ResultCreatinine.Equals("999") && !ent.ResultCreatinine.Equals("0")) /// validar poner operador
+			{
+                if (Convert.ToDouble(ent.ResultCreatinine.Replace(",", ".")) < 0.2 || Convert.ToDouble(ent.ResultCreatinine.Replace(",", ".")) > 25)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 107", $"{pipe}", "Resultado Creatinina", $"{pipe}", "El rango debe ser un numero decimal de 0.2 a 25 o tener el valor de 0 ó 999"));
+                }
+            }
+
+            //Valida hemoglobina variable 109
+            if (!ent.ResultGlycosylatedHemoglobin.Equals("999") && !ent.ResultGlycosylatedHemoglobin.Equals("0")) //validar poner operador
+            {
+                if (Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(",", ".")) < 5 || Convert.ToDouble(ent.ResultGlycosylatedHemoglobin.Replace(",", ".")) > 20)
+                {
+                    listErrors.Add(string.Concat($"Fila { index}", $"{pipe}", "Variable 109", $"{pipe}", "Hemoglobina Glicosilada", $"{pipe}", "El rango debe ser un numero decimal de 5 a 20 o tener el valor de 0 ó 999"));
+                }
+            }
+
+            return true;
+        }
+        #region Members
+        #endregion
+        /// <sumary>
+        /// Prototipo de verificación
+        /// </sumary> 
+        /// <param name="rules">Reglas a evaluar</param>
+        public static object SYS_VerificationPrototype(object rules)
+        {
+            IEnumerable<Func<object>> funcs = ((IEnumerable<Func<object>>)rules);
+
+            string messages = string.Empty;
+            bool result = true;
+            foreach (Func<object> rul in funcs)
+            {
+                var r = rul();
+                if (!r.GetPropertyValue<bool>("IsValid"))
+                {
+                    result = false;
+                    messages += "* " + r.GetPropertyValue<string>("Message") + "\n\r";
+                }
+            }
+
+            return new { Result = result, Messages = messages };
+        }
+
 
         #region Extention
         /// <sumary>
@@ -23688,6 +23841,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         }
         #endregion
     }
+
 
     /// <summary>
     /// Encapsula el resultado de la petición
@@ -23820,13 +23974,13 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _FirstLastName;
         [Order]
-        [Regex(@"^([A-Z]){1,30}$", "Variable 5 - Primer Apellido -  Solo permite letras mayusculas con longitud de 1 a 30 caracteres.Sin caracteres especiales ni espacios")] public string FirstLastName { get { return _FirstLastName; } set { _FirstLastName = ValidateValue<string>(value, nameof(FirstLastName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 5 - Primer Apellido -  Solo permite letras mayusculas con longitud de 1 a 30 caracteres.Sin caracteres especiales ni espacios")] public string FirstLastName { get { return _FirstLastName; } set { _FirstLastName = ValidateValue<string>(value, nameof(FirstLastName)); } }
         /// <sumary>
         /// SecondLastName
         /// </sumary>
         private string _SecondLastName;
         [Order]
-        [Regex(@"^([A-Z]){1,30}$", "Variable 6 - SegundoApellido -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondLastName { get { return _SecondLastName; } set { _SecondLastName = ValidateValue<string>(value, nameof(SecondLastName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 6 - SegundoApellido -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondLastName { get { return _SecondLastName; } set { _SecondLastName = ValidateValue<string>(value, nameof(SecondLastName)); } }
         /// <sumary>
         /// FirstName
         /// </sumary>
@@ -23838,7 +23992,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _SecondName;
         [Order]
-        [Regex(@"^([A-Z]){1,30}$", "Variable 8 - SegundoNombre -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondName { get { return _SecondName; } set { _SecondName = ValidateValue<string>(value, nameof(SecondName)); } }
+        [Regex(@"^([A-Z ]){1,30}$", "Variable 8 - SegundoNombre -Solo permite longitud de 1 a 30 caracteres o la palabra NONE en mayuscula.Sin caracteres especiales ni espacios")] public string SecondName { get { return _SecondName; } set { _SecondName = ValidateValue<string>(value, nameof(SecondName)); } }
         /// <sumary>
         /// BirthDate
         /// </sumary>
@@ -24414,7 +24568,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _ResultHemoglobin;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$", "Variable 104 - Hemoglobina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.) si no reporta ingrese el numero (0).Sin caracteres especiales ni espacios")] public string ResultHemoglobin { get { return _ResultHemoglobin; } set { _ResultHemoglobin = ValidateValue<string>(value, nameof(ResultHemoglobin)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 104 - Hemoglobina -  Solo acepta dato reportado por el laboratorio (max 1 decimal delimitado por punto(.) si no reporta ingrese el numero (0).Sin caracteres especiales ni espacios")] public string ResultHemoglobin { get { return _ResultHemoglobin; } set { _ResultHemoglobin = ValidateValue<string>(value, nameof(ResultHemoglobin)); } }
         /// <sumary>
         /// DateGlycemia
         /// </sumary>
@@ -24432,7 +24586,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _ResultCreatinine;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$|(0|999)$", "Variable 107 - Creatinina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.)) si no tiene el dato registrar (999) si no aplica registrar (0).Sin caracteres especiales ni espacios")] public string ResultCreatinine { get { return _ResultCreatinine; } set { _ResultCreatinine = ValidateValue<string>(value, nameof(ResultCreatinine)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|(0|999)$", "Variable 107 - Creatinina -  Solo acepta dato reportado por el laboratorio (max 1 decimal delimitado por punto(.)) si no tiene el dato registrar (999) si no aplica registrar (0).Sin caracteres especiales ni espacios")] public string ResultCreatinine { get { return _ResultCreatinine; } set { _ResultCreatinine = ValidateValue<string>(value, nameof(ResultCreatinine)); } }
         /// <sumary>
         /// DateGlycosylatedHemoglobin
         /// </sumary>
@@ -24444,7 +24598,7 @@ namespace OpheliaSuiteV2.BRMRuntime
         /// </sumary>
         private string _ResultGlycosylatedHemoglobin;
         [Order]
-        [Regex(@"^(\d+)?([.]?\d{0,1})?$", "Variable 109 - Resultado Hemoglobina -  Solo acepta dato reportado por el laboratorio (decimal delimitado por punto(.)) si no reporta ingrese el numero (0) cero o 999.Sin caracteres especiales ni espacios")] public string ResultGlycosylatedHemoglobin { get { return _ResultGlycosylatedHemoglobin; } set { _ResultGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(ResultGlycosylatedHemoglobin)); } }
+        [Regex(@"^(\d+)?([.]?\d{0,1})?$|^(999)", "Variable 109 - Resultado Hemoglobina -  Solo acepta dato reportado por el laboratorio ( max 1 decimal delimitado por punto(.)) si no reporta ingrese el numero (0) cero o 999.Sin caracteres especiales ni espacios")] public string ResultGlycosylatedHemoglobin { get { return _ResultGlycosylatedHemoglobin; } set { _ResultGlycosylatedHemoglobin = ValidateValue<string>(value, nameof(ResultGlycosylatedHemoglobin)); } }
         /// <sumary>
         /// DateMicroalbuminuria
         /// </sumary>
